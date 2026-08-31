@@ -78,10 +78,17 @@
 
     (.restore ctx)))
 
+(def board
+  "Holds the state of the puzzle board, as a vector of three poles, each
+  of which is a list of disc numbers from top to bottom."
+  (atom nil))
+
 (defn reset-board
   "Helper function to reset the board and draw its initial state."
   []
-  (draw (.getElementById js/document "state") [(range 10) [] []]))
+  (let [num (parse-long (.-value (.getElementById js/document "numDiscs")))]
+    (reset! board [(range num) '() '()]))
+  (draw (.getElementById js/document "state") @board))
 
 (set! (.-resetBoard js/window) reset-board)
 (reset-board)

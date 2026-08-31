@@ -46,8 +46,17 @@
         h   (.-height canvas)]
     (.clearRect ctx 0 0 w h)
 
-    ;; Draw the base
+    ;; Draw the post labels
     (.save ctx)
+    (set! (.-fillStyle ctx) "gray")
+    (set! (.-font ctx) "24px sans-serif")
+    (set! (.-textAlign ctx) "center")
+    (dotimes [i 3]
+      (let [x     (* w (get post-positions i))
+            label (char (+ 65 i))]
+        (.fillText ctx label x (- (* h post-height) 20))))
+
+    ;; Draw the base
     (set! (.-fillStyle ctx) "tan")
     (rounded-rect ctx 10 (- h 40) (- w 20) 40 5)
     (.fill ctx)
@@ -68,7 +77,7 @@
             [ring height] (map-indexed (fn [idx itm]
                                          [itm (- h 30 (* ring-height (- (count post) idx)))])
                                        post)]
-      (let [scale (/ ring 9.0)
+      (let [scale  (/ ring 9.0)
             offset (+ small-ring (* (- large-ring small-ring) scale 0.5))]
         (.beginPath ctx)
         (set! (.-strokeStyle ctx) (get ring-colors ring))

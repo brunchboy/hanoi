@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Towers of Hanoi</title>
+
+    <script src="js/scittle.js" type="application/javascript"></script>
+    <script>var SCITTLE_NREPL_WEBSOCKET_PORT = 1340;</script>
+    <script src="js/scittle.nrepl.js" type="application/javascript"></script>
+    <script src="cljs/nav.cljs" type="application/x-scittle"></script>
+    <script src="cljs/board.cljs" type="application/x-scittle"></script>
+
+    <style>
+      .scrollableAreaContainer {
+          width: 200px;
+          height: 400px;
+
+          border: 2px solid #111;
+          overflow: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <table>
+      <thead>
+        <tr>
+          <th>State</th>
+          <th>Tasks</th>
+          <th>Moves</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <canvas id="state" width="600" height="400"></canvas>
+          </td>
+          <td>
+            <div class="scrollableAreaContainer">
+              <div class="scrollableTaskConteiner">
+                <ul class="scrollableTasks">
+                </ul>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="scrollableAreaContainer">
+              <div class="scrollableMoveContainer">
+                <ul class="scrollableMoves">
+                  <li>A</li>
+                  <li>B</li>
+                  <li>C</li>
+                  <li>D</li>
+                  <li>E</li>
+                  <li>F</li>
+                  <li>G</li>
+                  <li>H</li>
+                  <li>I</li>
+                  <li>J</li>
+                  <li>K</li>
+                  <li>L</li>
+                  <li>M</li>
+                  <li>N</li>
+                  <li>O</li>
+                  <li>P</li>
+                  <li>Q</li>
+                  <li>R</li>
+                  <li>S</li>
+                  <li>T</li>
+                  <li>U</li>
+                  <li>V</li>
+                  <li>W</li>
+                  <li>X</li>
+                  <li>Y</li>
+                  <li>Z</li>
+                </ul>
+              </div>
+            </div>
+
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button onclick="showNotes()">
+      Show Notes
+    </button>
+
+  </body>
+</html>

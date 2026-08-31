@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaker Notes</title>
+
+    <style>
+    </style>
+    <script type="text/javascript">
+      function updateParent()
+      {
+        if ( typeof window.opener.setNotes == 'function' ) {
+          window.opener.setNotes(window);
+        }
+      }
+      window.setInterval(updateParent, 2000);
+      updateParent();
+    </script>
+  </head>
+
+  <body>
+    <h1>Speaker Notes</h1>
+    <div id="notes">
+      <p>Loading…</p>
+    </div>
+  </body>
+</html>

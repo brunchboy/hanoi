@@ -1,0 +1,22 @@
+{:deps {org.babashka/http-server {:mvn/version "0.1.14"}
+        org.babashka/cli {:mvn/version "0.2.23"}
+        io.github.babashka/sci.nrepl {:mvn/version "0.0.2"}}
+ :tasks
+ {:requires ([babashka.cli :as cli])
+  :init (def cli-opts (cli/parse-opts *command-line-args* {:coerce {:port :int :headers :edn}}))
+
+  serve {:doc "Serve static assets"
+         :requires ([babashka.http-server :as server])
+         :task (server/exec (merge {:port 1337
+                                    :dir "resources/public"}
+                                   cli-opts))}
+
+  nrepl {:doc "Offer nREPL connection to page"
+         :requires ([sci.nrepl.browser-server :as nrepl])
+         :task (nrepl/start! {:nrepl-port 1339 :websocket-port 1340})}
+
+  prn {:task (clojure "-X clojure.core/prn" cli-opts)}
+
+  -dev {:depends [serve nrepl prn]}
+
+  dev {:task (run '-dev {:parallel true})}}}

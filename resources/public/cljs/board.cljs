@@ -1,4 +1,5 @@
-(ns board)
+(ns board
+  (:require [clojure.set :as set]))
 
 (defn rounded-rect
   "Creeates a path that is a rectangle with rounded corners of the
@@ -97,6 +98,13 @@
   s-expressions."
   (atom nil))
 
+(defn update-step-button
+  "Makes sure the Step button is enabled if there are tasks in the
+  stack, and disabled otherwise."
+  []
+  (let [button (.getElementById js/document "stepButton")]
+    (set! (.-disabled button) (empty? @tasks))))
+
 (defn format-tasks
   "Formats the task list as a series of list items on the page."
   []
@@ -125,23 +133,93 @@
                                              1000))))
     (if all-tasks
       (do
-        (swap! tasks #(concat all-tasks (rest %)))
+        (swap! tasks #(apply concat all-tasks (list (rest %))))
         (set! (.-opacity (.-style expanding-element)) 0)
         (.setTimeout js/window
                      #(animate-tasks-in [] nil expanding-element)
                      1000))
-      (.remove expanding-element))))
+      (do (.remove expanding-element)
+          (update-step-button)))))
 
-(defn expand-top-task
-  "Runs an animation that shows the top task is being replaced by a
-  recursive expansion, then actually make that replacement in the atom
-  and re-render the list from it."
-  [expansion]
+(defn animate-task-starting
+  "Changes the appearance of the top task to show that it is running,
+  and return that DOM element for the use of later animations."
+  []
   (let [tasks-element   (.getElementById js/document "tasks")
         children        (.-children tasks-element)
         running-element (.item children 0)]
     (set! (.-className running-element) "running")
+    running-element))
+
+(defn animate-top-expansion
+  "Runs an animation that shows the top task is being replaced by a
+  recursive expansion, then actually make that replacement in the atom
+  and re-render the list from it."
+  [expansion]
+  (let [running-element (animate-task-starting)]
     (animate-tasks-in expansion expansion running-element)))
+
+(defn other-post
+  "Given a pair of posts, return the one that was not mentioned."
+  [x y]
+  (first (set/difference #{'A 'B 'C} (set [x y]))))
+
+(defn expand-hanoi
+  "Given a hanoi task, return its expansion, either a series of steps
+  involving smaller hanoi tasks and a move, or for the base case of
+  one disk, a single move."
+  [n from to]
+  (if (< n 2)
+    [(list 'move from to)] ; We have reached the base case; terminate.
+    [(list 'hanoi (dec n) from (other-post from to))
+     (list 'move from to)
+     (list 'hanoi (dec n) (other-post from to) to)]))
+
+(def post-index
+  "The map from post symbols to their indices within the board atom."
+  {'A 0
+   'B 1
+   'C 2})
+
+(defn draw-current-board-state
+  "Renders the current state of the board atom into the canvas."
+  []
+  (draw (.getElementById js/document "state") @board))
+
+(defn animate-top-move
+  "Runs an animation that shows the top task, which is a move, taking
+  place."
+  [from to]
+  (let [running-element (animate-task-starting)
+        from-index      (post-index from)
+        to-index        (post-index to)
+        disk            (first (get @board from-index))
+        moves           (.getElementById js/document "moves")]
+    (.insertAdjacentHTML moves "beforeend" (str "<li>" from " → " to "</li>"))
+    ;; TODO draw the cool animation I have planned out!
+    (swap! board (fn [state]
+                   (-> state
+                       (update from-index rest)
+                       (update to-index conj disk))))
+    (draw-current-board-state)
+    (swap! tasks rest)
+    (set! (.-opacity (.-style running-element)) 0)
+        (.setTimeout js/window
+                     (fn []
+                       (.remove running-element)
+                       (update-step-button))
+                     1000)))
+
+(defn run-top-task
+  "Looks at the top of the task stack and takes the appropriate action,
+  either recursively expanding it or moving a disk."
+  []
+  (when-let [[action & args] (first @tasks)]
+    (case action
+      hanoi (animate-top-expansion (apply expand-hanoi args))
+      move  (apply animate-top-move args))))
+
+(set! (.-runStep js/window) run-top-task)
 
 (defn reset-board
   "Helper function to reset the board and draw its initial state."
@@ -149,9 +227,10 @@
   (let [num (parse-long (.-value (.getElementById js/document "numDiscs")))]
     (reset! board [(range num) '() '()])
     (reset! tasks (list (list 'hanoi num 'A 'B))))
-  (draw (.getElementById js/document "state") @board)
+  (draw-current-board-state)
   (format-tasks)
-  (set! (.-innerHTML (.getElementById js/document "moves")) ""))
+  (set! (.-innerHTML (.getElementById js/document "moves")) "")
+  (update-step-button))
 
 (set! (.-resetBoard js/window) reset-board)
 (reset-board)

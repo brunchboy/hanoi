@@ -19,6 +19,23 @@
           border: 2px solid #111;
           overflow: auto;
       }
+      .scrollableTaskContainer {
+          padding: 0;
+      }
+      .scrollableTasks li {
+          padding: 10px;
+          font-family: sans-serif;
+          font-size: 20px;
+          list-style-type: circle;
+          transition: opacity 1s, display 1s allow-discrete;
+      }
+      .scrollableTasks li.running {
+          list-style-type: disc;
+          color: green;
+      }
+      .scrollableTasks li.hidden {
+          opacity: 0;
+      }
     </style>
   </head>
 
@@ -38,8 +55,8 @@
           </td>
           <td>
             <div class="scrollableAreaContainer">
-              <div class="scrollableTaskConteiner">
-                <ul class="scrollableTasks">
+              <div class="scrollableTaskContainer">
+                <ul id="tasks" class="scrollableTasks">
                 </ul>
               </div>
             </div>
@@ -47,7 +64,7 @@
           <td>
             <div class="scrollableAreaContainer">
               <div class="scrollableMoveContainer">
-                <ul class="scrollableMoves">
+                <ul id="moves" class="scrollableMoves">
                   <li>A</li>
                   <li>B</li>
                   <li>C</li>

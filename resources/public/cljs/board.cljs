@@ -88,16 +88,70 @@
     (.restore ctx)))
 
 (def board
-  "Holds the state of the puzzle board, as a vector of three poles, each
+  "Holds the state of the puzzle board, as a vector of three posts, each
   of which is a list of disc numbers from top to bottom."
   (atom nil))
+
+(def tasks
+  "Holds the stack of tasks to be performed, as a list of
+  s-expressions."
+  (atom nil))
+
+(defn format-tasks
+  "Formats the task list as a series of list items on the page."
+  []
+  (set! (.-innerHTML (.getElementById js/document "tasks"))
+        (reduce (fn [acc task] (str acc "<li>" task "</li>"))
+                ""
+                @tasks)))
+
+(defn animate-tasks-in
+  "The animation task which causes a set of expanded tasks to appear
+  one-by-one in front of the expanding element, which then fades out.
+  tasks-left holds the remaining tasks to be added, for recursive
+  calls, while all-tasks retains the entire list, so they can be
+  actually grafted into the atom once the animation completes. During
+  the final stage, one last recursive call with a `nil` value for
+  `all-tasks` actually removes the faded-out expanding element."
+  [tasks-left all-tasks expanding-element]
+  (if-let [task (first tasks-left)]
+    (do
+      (.insertAdjacentHTML expanding-element "beforebegin" (str "<li class=hidden>" task "</li>"))
+      (.requestAnimationFrame js/window
+                              (fn [_]
+                                (.remove (.-classList (.-previousElementSibling expanding-element)) "hidden")
+                                (.setTimeout js/window
+                                             #(animate-tasks-in (rest tasks-left) all-tasks expanding-element)
+                                             1000))))
+    (if all-tasks
+      (do
+        (swap! tasks #(concat all-tasks (rest %)))
+        (set! (.-opacity (.-style expanding-element)) 0)
+        (.setTimeout js/window
+                     #(animate-tasks-in [] nil expanding-element)
+                     1000))
+      (.remove expanding-element))))
+
+(defn expand-top-task
+  "Runs an animation that shows the top task is being replaced by a
+  recursive expansion, then actually make that replacement in the atom
+  and re-render the list from it."
+  [expansion]
+  (let [tasks-element   (.getElementById js/document "tasks")
+        children        (.-children tasks-element)
+        running-element (.item children 0)]
+    (set! (.-className running-element) "running")
+    (animate-tasks-in expansion expansion running-element)))
 
 (defn reset-board
   "Helper function to reset the board and draw its initial state."
   []
   (let [num (parse-long (.-value (.getElementById js/document "numDiscs")))]
-    (reset! board [(range num) '() '()]))
-  (draw (.getElementById js/document "state") @board))
+    (reset! board [(range num) '() '()])
+    (reset! tasks (list (list 'hanoi num 'A 'B))))
+  (draw (.getElementById js/document "state") @board)
+  (format-tasks)
+  (set! (.-innerHTML (.getElementById js/document "moves")) ""))
 
 (set! (.-resetBoard js/window) reset-board)
 (reset-board)

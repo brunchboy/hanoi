@@ -38,6 +38,28 @@
   "The width of the largest ring."
   100)
 
+(defn ring-y
+  "Figures out the height at which a ring should be drawn if it is nth
+  from the bottom, given the height of the canvas."
+  [h n]
+  (- h 30 (* ring-height n)))
+
+(defn draw-ring
+  "Draws the specified ring at the specified coordinates in the supplied
+  graphics context."
+  [ctx ring x y]
+  (.save ctx)
+  (set! (.-lineCap ctx) "round")
+  (set! (.-lineWidth ctx) ring-height)
+  (let [scale  (/ ring 9.0)
+        offset (+ small-ring (* (- large-ring small-ring) scale 0.5))]
+    (.beginPath ctx)
+    (set! (.-strokeStyle ctx) (get ring-colors ring))
+    (.moveTo ctx (- x offset) y)
+    (.lineTo ctx (+ x offset) y)
+    (.stroke ctx)
+    (.restore ctx)))
+
 (defn draw
   "Draws the current board state, given the canvas and the contents of
   the posts (a list of lists of ring identifiers from 0 to 9."
@@ -73,30 +95,33 @@
     (.stroke ctx)
 
     ;; Draw the rings
-    (set! (.-lineWidth ctx) ring-height)
     (doseq [[post x]      (map (fn [itm pos] [itm (* w pos)]) posts post-positions)
             [ring height] (map-indexed (fn [idx itm]
-                                         [itm (- h 30 (* ring-height (- (count post) idx)))])
+                                         [itm (ring-y h (- (count post) idx))])
                                        post)]
-      (let [scale  (/ ring 9.0)
-            offset (+ small-ring (* (- large-ring small-ring) scale 0.5))]
-        (.beginPath ctx)
-        (set! (.-strokeStyle ctx) (get ring-colors ring))
-        (.moveTo ctx (- x offset) height)
-        (.lineTo ctx (+ x offset) height))
-      (.stroke ctx))
+      (draw-ring ctx ring x height))
 
     (.restore ctx)))
 
 (def board
   "Holds the state of the puzzle board, as a vector of three posts, each
   of which is a list of disc numbers from top to bottom."
-  (atom nil))
+  (atom []))
 
 (def tasks
   "Holds the stack of tasks to be performed, as a list of
   s-expressions."
-  (atom nil))
+  (atom '()))
+
+(def fade-ms
+  "How many milliseconds to wait for values to fade in or out when
+  animating steps."
+  500)  ;; TODO, when changing this, change CSS to match; maybe tie with code?
+
+(def move-ms
+  "How many milliseconds to spend animating the movement of a disk
+  from one post to another."
+  (* 2 fade-ms))
 
 (defn update-step-button
   "Makes sure the Step button is enabled if there are tasks in the
@@ -130,14 +155,14 @@
                                 (.remove (.-classList (.-previousElementSibling expanding-element)) "hidden")
                                 (.setTimeout js/window
                                              #(animate-tasks-in (rest tasks-left) all-tasks expanding-element)
-                                             1000))))
+                                             fade-ms))))
     (if all-tasks
       (do
         (swap! tasks #(apply concat all-tasks (list (rest %))))
         (set! (.-opacity (.-style expanding-element)) 0)
         (.setTimeout js/window
                      #(animate-tasks-in [] nil expanding-element)
-                     1000))
+                     fade-ms))
       (do (.remove expanding-element)
           (update-step-button)))))
 
@@ -186,6 +211,43 @@
   []
   (draw (.getElementById js/document "state") @board))
 
+(defn ramp
+  "Calculates a shifted cosine ramp from the starting to ending value
+  at the specified fraction of the path."
+  [start end fraction]
+  (let [scale (- 1.0 (js/Math.cos (* fraction js/Math.PI)))]
+    (+ start (* (- end start) scale 0.5))))
+
+(defn disk-move-animation-step
+  "Function used as a browser animation callback to animate the movement
+  of a disk moving from one post to another. State is an atom that was
+  set up to describe the details of the move and keep track of events
+  as it evolves, and timestamp is the browser-reported current
+  monotonic time."
+  [state timestamp]
+  (swap! state update :start #(or % timestamp))  ; Capture first timestamp as start.
+  (let [{:keys [disk our-board start canvas
+                from-x from-y to-x to-y]} @state
+        elapsed                           (- timestamp start)
+        fraction                          (/ elapsed move-ms)]
+    (if (>= fraction 1.0)
+      (draw canvas @board)  ; We are all done!
+      (let [ctx (.getContext canvas "2d")
+            x   (if (< fraction 0.1)
+                   from-x
+                   (if (> fraction 0.9)
+                     to-x
+                     (ramp from-x to-x (/ (- fraction 0.1) 0.8))))
+            y   (if (< fraction 0.3)
+                (ramp from-y 25 (/ fraction 0.3))
+                (if (> fraction 0.7)
+                  (ramp 25 to-y (/ (- fraction 0.7) 0.3))
+                  25))]
+        (draw canvas our-board)  ; Start with board minus the ring we are moving.
+        (draw-ring ctx disk x y)
+        (.requestAnimationFrame js/window (partial disk-move-animation-step state))))))
+
+
 (defn animate-top-move
   "Runs an animation that shows the top task, which is a move, taking
   place."
@@ -196,19 +258,35 @@
         disk            (first (get @board from-index))
         moves           (.getElementById js/document "moves")]
     (.insertAdjacentHTML moves "beforeend" (str "<li>" from " → " to "</li>"))
-    ;; TODO draw the cool animation I have planned out!
+
+    ;; Move the disk as specified
     (swap! board (fn [state]
                    (-> state
                        (update from-index rest)
                        (update to-index conj disk))))
-    (draw-current-board-state)
+
+    ;; Run the animation of that move in the browser.
+    (let [canvas    (.getElementById js/document "state")
+          w         (.-width canvas)
+          h         (.-height canvas)
+          our-board (update @board to-index rest) ; Omit the disk we are moving
+          move      (atom {:from-x    (* w (post-positions from-index))
+                           :from-y    (ring-y h (inc (count (get our-board from-index))))
+                           :to-x      (* w (post-positions to-index))
+                           :to-y      (ring-y h (inc (count (get our-board to-index))))
+                           :disk      disk
+                           :our-board our-board
+                           :canvas    canvas})]
+      (.requestAnimationFrame js/window (partial disk-move-animation-step move)))
+
+    ;; Fade out and drop the task that caused this move.
     (swap! tasks rest)
     (set! (.-opacity (.-style running-element)) 0)
-        (.setTimeout js/window
-                     (fn []
-                       (.remove running-element)
-                       (update-step-button))
-                     1000)))
+    (.setTimeout js/window
+                 (fn []
+                   (.remove running-element)
+                   (update-step-button))
+                 fade-ms)))
 
 (defn run-top-task
   "Looks at the top of the task stack and takes the appropriate action,

@@ -108,97 +108,15 @@
   of which is a list of disc numbers from top to bottom."
   (atom []))
 
-(def tasks
-  "Holds the stack of tasks to be performed, as a list of
-  s-expressions."
-  (atom '()))
-
-(def fade-ms
-  "How many milliseconds to wait for values to fade in or out when
-  animating steps."
-  500)  ;; TODO, when changing this, change CSS to match; maybe tie with code?
-
 (def move-ms
   "How many milliseconds to spend animating the movement of a disk
   from one post to another."
-  (* 2 fade-ms))
-
-(defn update-step-button
-  "Makes sure the Step button is enabled if there are tasks in the
-  stack, and disabled otherwise."
-  []
-  (let [button (.getElementById js/document "stepButton")]
-    (set! (.-disabled button) (empty? @tasks))))
-
-(defn format-tasks
-  "Formats the task list as a series of list items on the page."
-  []
-  (set! (.-innerHTML (.getElementById js/document "tasks"))
-        (reduce (fn [acc task] (str acc "<li>" task "</li>"))
-                ""
-                @tasks)))
-
-(defn animate-tasks-in
-  "The animation task which causes a set of expanded tasks to appear
-  one-by-one in front of the expanding element, which then fades out.
-  tasks-left holds the remaining tasks to be added, for recursive
-  calls, while all-tasks retains the entire list, so they can be
-  actually grafted into the atom once the animation completes. During
-  the final stage, one last recursive call with a `nil` value for
-  `all-tasks` actually removes the faded-out expanding element."
-  [tasks-left all-tasks expanding-element]
-  (if-let [task (first tasks-left)]
-    (do
-      (.insertAdjacentHTML expanding-element "beforebegin" (str "<li class=hidden>" task "</li>"))
-      (.requestAnimationFrame js/window
-                              (fn [_]
-                                (set! (.-opacity (.-style (.-previousElementSibling expanding-element))) 1)
-                                (.setTimeout js/window
-                                             #(animate-tasks-in (rest tasks-left) all-tasks expanding-element)
-                                             (quot fade-ms 5)))))
-    (if all-tasks
-      (do
-        (swap! tasks #(apply concat all-tasks (list (rest %))))
-        (set! (.-opacity (.-style expanding-element)) 0)
-        (.setTimeout js/window
-                     #(animate-tasks-in [] nil expanding-element)
-                     fade-ms))
-      (do (.remove expanding-element)
-          (update-step-button)))))
-
-(defn animate-task-starting
-  "Changes the appearance of the top task to show that it is running,
-  and return that DOM element for the use of later animations."
-  []
-  (let [tasks-element   (.getElementById js/document "tasks")
-        children        (.-children tasks-element)
-        running-element (.item children 0)]
-    (set! (.-className running-element) "running")
-    running-element))
-
-(defn animate-top-expansion
-  "Runs an animation that shows the top task is being replaced by a
-  recursive expansion, then actually make that replacement in the atom
-  and re-render the list from it."
-  [expansion]
-  (let [running-element (animate-task-starting)]
-    (animate-tasks-in expansion expansion running-element)))
+  1000)
 
 (defn other-post
   "Given a pair of posts, return the one that was not mentioned."
   [x y]
   (first (set/difference #{'A 'B 'C} (set [x y]))))
-
-(defn expand-hanoi
-  "Given a hanoi task, return its expansion, either a series of steps
-  involving smaller hanoi tasks and a move, or for the base case of
-  one disk, a single move."
-  [n from to]
-  (if (< n 2)
-    [(list 'move from to)] ; We have reached the base case; terminate.
-    [(list 'hanoi (dec n) from (other-post from to))
-     (list 'move from to)
-     (list 'hanoi (dec n) (other-post from to) to)]))
 
 (def post-index
   "The map from post symbols to their indices within the board atom."
@@ -247,17 +165,13 @@
         (draw-ring ctx disk x y)
         (.requestAnimationFrame js/window (partial disk-move-animation-step state))))))
 
-
-(defn animate-top-move
-  "Runs an animation that shows the top task, which is a move, taking
-  place."
+(defn animate-disk-move
+  "Animate the movement of a disk from one post to another, updating the
+  board state to reflect the result."
   [from to]
-  (let [running-element (animate-task-starting)
-        from-index      (post-index from)
+  (let [from-index      (post-index from)
         to-index        (post-index to)
-        disk            (first (get @board from-index))
-        moves           (.getElementById js/document "moves")]
-    (.insertAdjacentHTML moves "beforeend" (str "<li>" from " → " to "</li>"))
+        disk            (first (get @board from-index))]
 
     ;; Move the disk as specified
     (swap! board (fn [state]
@@ -277,38 +191,11 @@
                            :disk      disk
                            :our-board our-board
                            :canvas    canvas})]
-      (.requestAnimationFrame js/window (partial disk-move-animation-step move)))
-
-    ;; Fade out and drop the task that caused this move.
-    (swap! tasks rest)
-    (set! (.-opacity (.-style running-element)) 0)
-    (.setTimeout js/window
-                 (fn []
-                     (.remove running-element)
-                   (update-step-button))
-                 fade-ms)))
-
-(defn run-top-task
-  "Looks at the top of the task stack and takes the appropriate action,
-  either recursively expanding it or moving a disk."
-  []
-  (when-let [[action & args] (first @tasks)]
-    (case action
-      hanoi (animate-top-expansion (apply expand-hanoi args))
-      move  (apply animate-top-move args))))
-
-(set! (.-runStep js/window) run-top-task)
+      (.requestAnimationFrame js/window (partial disk-move-animation-step move)))))
 
 (defn reset-board
-  "Helper function to reset the board and draw its initial state."
-  []
-  (let [num (parse-long (.-value (.getElementById js/document "numDiscs")))]
-    (reset! board [(range num) '() '()])
-    (reset! tasks (list (list 'hanoi num 'A 'B))))
-  (draw-current-board-state)
-  (format-tasks)
-  (set! (.-innerHTML (.getElementById js/document "moves")) "")
-  (update-step-button))
-
-(set! (.-resetBoard js/window) reset-board)
-(reset-board)
+  "Helper function to reset the board and draw its initial state, for a
+  specified number of discs, which must be from 1 to 10."
+  [num-discs]
+  (reset! board [(range num-discs) '() '()])
+  (draw-current-board-state))

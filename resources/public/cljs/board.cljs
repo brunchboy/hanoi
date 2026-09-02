@@ -152,10 +152,10 @@
       (.insertAdjacentHTML expanding-element "beforebegin" (str "<li class=hidden>" task "</li>"))
       (.requestAnimationFrame js/window
                               (fn [_]
-                                (.remove (.-classList (.-previousElementSibling expanding-element)) "hidden")
+                                (set! (.-opacity (.-style (.-previousElementSibling expanding-element))) 1)
                                 (.setTimeout js/window
                                              #(animate-tasks-in (rest tasks-left) all-tasks expanding-element)
-                                             fade-ms))))
+                                             (quot fade-ms 5)))))
     (if all-tasks
       (do
         (swap! tasks #(apply concat all-tasks (list (rest %))))
@@ -233,11 +233,11 @@
     (if (>= fraction 1.0)
       (draw canvas @board)  ; We are all done!
       (let [ctx (.getContext canvas "2d")
-            x   (if (< fraction 0.1)
+            x   (if (< fraction 0.2)
                    from-x
-                   (if (> fraction 0.9)
+                   (if (> fraction 0.8)
                      to-x
-                     (ramp from-x to-x (/ (- fraction 0.1) 0.8))))
+                     (ramp from-x to-x (/ (- fraction 0.2) 0.6))))
             y   (if (< fraction 0.3)
                 (ramp from-y 25 (/ fraction 0.3))
                 (if (> fraction 0.7)
@@ -284,7 +284,7 @@
     (set! (.-opacity (.-style running-element)) 0)
     (.setTimeout js/window
                  (fn []
-                   (.remove running-element)
+                     (.remove running-element)
                    (update-step-button))
                  fade-ms)))
 

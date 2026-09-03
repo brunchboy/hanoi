@@ -16,7 +16,7 @@
 
 (def page
   "Holds the current page number we are viewing."
-  (atom (identify-page)))
+  (identify-page))
 
 (def step
   "Holds the step number we have reached, for multi-step pages."
@@ -38,7 +38,7 @@
   or step."
   []
   (when (and @notes-window (not (.-closed @notes-window)))
-    (let [page-name (str "partials/notes/" (first (get index (dec @page))))]
+    (let [page-name (str "partials/notes/" (first (get index (dec page))))]
       (if (= @step 1)
         (-> (js/fetch page-name)
             (.then (fn [response]
@@ -54,7 +54,7 @@
                        (.text response)
                        (js/Promise.resolve nil))))  ; No notes change for this step.
             (.then (fn [text] (when text (set-notes-body text))))
-            (.catch (fn [e] (set-notes-body (str "<h1>Problem Loading notes</h1><p>" e "</p>")))))))))
+            (.catch (fn [e] (set-notes-body (str "<h2>Problem Loading notes</h2><p>" e "</p>")))))))))
 
 (defn show-notes
   "Make sure the notes window is showing, creating if needed."
@@ -77,3 +77,54 @@
 ;; export functions to use from JavaScript:
 (set! (.-showNotes js/window) show-notes)
 (set! (.-setNotes js/window) set-notes)
+
+
+;; Install the navigation section in the page.
+
+(defn create-navigation
+  "Loads the HTML of the navigation section into the page."
+  [html]
+  (if-let [navigation (.getElementById js/document "navigation")]
+    (if html
+      (do
+        (set! (.-innerHTML navigation) html)
+        ;; Hide next or Previous buttons if we are at either end, otherwise show and configure where they go.
+        (let [button (.getElementById js/document "previous-button")]
+          (if (= 1 page)
+            (set! (.-disabled button) true)
+            (let [[file title] (get index (dec (dec page)))]
+              (.setAttribute button "onclick" (str "window.location.href='" file "'"))
+              (let [label (.getElementById js/document "previous-title")]
+                (set! (.-innerHTML label) (str "<a href=\"" file "\">" title "</a>"))))))
+        (when (> 1 page)
+          (let [label (.getElementById js/document "previous-label")]
+            (set! (.-innerHTML label) (get-in index [(dec (dec page)) 1]))))
+        (let [button (.getElementById js/document "next-button")]
+          (if (= (count index) page)
+            (set! (.-disabled button) true)
+            (let [[file title] (get index page)]
+              (.setAttribute button "onclick" (str "window.location.href='" file "'"))
+              (let [label (.getElementById js/document "next-title")]
+                (set! (.-innerHTML label) (str "<a href=\"" file "\">" title "</a>"))))))
+
+        ;; Populate the page selection menu.
+        (let [select (.getElementById js/document "page-select")]
+          (doseq [[idx [file title]] (map-indexed (fn [idx entry] [(inc idx) entry]) index)]
+            (let [option (.createElement js/document "option")]
+              (set! (.-value option) file)
+              (set! (.-innerHTML option) title)
+              (when (= idx page) (set! (.-selected option) true))
+              (.appendChild select option)))
+          (.addEventListener select "change"
+                             (fn [event]
+                               (set! (.-href (.-location js/window)) (.-value (.-target event)))))))
+      (set! (.-innerHTML navigation) "Unable to load navigation section."))
+    (.log js/console "Unable to find navigation div!")))
+
+(-> (js/fetch "partials/nav.html")
+    (.then (fn [response]
+             (if (.-ok response)
+               (.text response)
+               (js/promise resolve nil))))
+    (.then (fn [text] (create-navigation text)))
+    (.catch (fn [e] (.log js/console e "Problem loading navigation."))))

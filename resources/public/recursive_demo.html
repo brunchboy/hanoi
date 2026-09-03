@@ -13,6 +13,21 @@
     <script src="cljs/recursive_demo.cljs" type="application/x-scittle"></script>
 
     <style>
+      /* Navigation */
+      .navigation {
+          text-align: center;
+      }
+      .navigation button {
+          font-size: 20px;
+      }
+      .navigation .previous {
+          float: left;
+      }
+      .navigation .next {
+          float: right;
+      }
+
+      /* Task and move lists */
       .scrollableAreaContainer {
           width: 200px;
           height: 400px;
@@ -88,13 +103,16 @@
     <p>
       <label for="numDiscs">Number of discs:</label>
       <input id="numDiscs" type="number" min="1" max="10" value="10" />
-      <button onclick="resetBoard()">Reset Board</button>
+      <button type="button" onclick="resetBoard()">Reset Board</button>
     </p>
 
     <p>
       <button onclick="showNotes()">Show Notes</button>
       &nbsp;&nbsp;
-      <button id="stepButton" onclick="runStep()">Step</button>
+      <button id="stepButton" type="button" onclick="runStep()">Step</button>
     </p>
+
+    <div id="navigation"></div>
+
   </body>
 </html>

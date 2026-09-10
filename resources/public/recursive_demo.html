@@ -1,68 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Towers of Hanoi</title>
 
+    <link rel="stylesheet" href="css/main.css"/>
     <script src="js/scittle.js" type="application/javascript"></script>
     <script>var SCITTLE_NREPL_WEBSOCKET_PORT = 1340;</script>
     <script src="js/scittle.nrepl.js" type="application/javascript"></script>
     <script src="cljs/nav.cljs" type="application/x-scittle"></script>
     <script src="cljs/board.cljs" type="application/x-scittle"></script>
     <script src="cljs/recursive_demo.cljs" type="application/x-scittle"></script>
-
-    <style>
-      /* Navigation */
-      .navigation {
-          text-align: center;
-      }
-      .navigation button {
-          font-size: 20px;
-      }
-      .navigation .previous {
-          float: left;
-      }
-      .navigation .next {
-          float: right;
-      }
-
-      /* Task and move lists */
-      .scrollableAreaContainer {
-          width: 200px;
-          height: 400px;
-
-          border: 2px solid #111;
-          overflow: auto;
-      }
-      .scrollableTaskContainer {
-          padding: 0;
-      }
-      .scrollableTasks li {
-          padding: 10px;
-          font-family: sans-serif;
-          font-size: 20px;
-          list-style-type: circle;
-          transition: opacity 500ms, display 500ms allow-discrete;
-      }
-      .scrollableTasks li.running {
-          list-style-type: disc;
-          color: green;
-      }
-      .scrollableTasks li.hidden {
-          opacity: 0;
-      }
-      .scrollableMoveContainer {
-          padding: 0;
-      }
-      .scrollableMoves li {
-          padding: 5px;
-          font-family: sans-serif;
-          font-size: 20px;
-
-      }
-
-    </style>
   </head>
 
   <body>

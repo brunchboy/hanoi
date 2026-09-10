@@ -1,0 +1,66 @@
+h1,h2 {
+    text-align: center;
+}
+h1 {
+    font-family: "ITC Friz Quadrata", cursive;
+}
+
+
+/* Navigation-related styles */
+.navigation {
+    text-align: center;
+}
+.navigation {
+    font-family: sans-serif;
+}
+.navigation table {
+    width: 100%;
+}
+.navigation button {
+    font-size: 20px;
+}
+.navigation .previous {
+    width: 33%;
+    text-align: left;
+}
+.navigation .menu {
+    width: 34%
+}
+.navigation .next {
+    width: 33%;
+    text-align: right;
+}
+
+/* Task and move lists */
+.scrollableAreaContainer {
+    width: 200px;
+    height: 400px;
+
+    border: 2px solid #111;
+    overflow: auto;
+}
+.scrollableTaskContainer {
+    padding: 0;
+}
+.scrollableTasks li {
+    padding: 10px;
+    font-family: sans-serif;
+    font-size: 20px;
+    list-style-type: circle;
+    transition: opacity 500ms, display 500ms allow-discrete;
+}
+.scrollableTasks li.running {
+    list-style-type: disc;
+    color: green;
+}
+.scrollableTasks li.hidden {
+    opacity: 0;
+}
+.scrollableMoveContainer {
+    padding: 0;
+}
+.scrollableMoves li {
+    padding: 5px;
+    font-family: sans-serif;
+    font-size: 20px;
+}

@@ -2,15 +2,16 @@ h1,h2 {
     text-align: center;
 }
 h1 {
-    font-family: "ITC Friz Quadrata", cursive;
+    font-family: cursive;
+}
+h2.cite {
+    font-style: italic;
 }
 
 
 /* Navigation-related styles */
 .navigation {
     text-align: center;
-}
-.navigation {
     font-family: sans-serif;
 }
 .navigation table {

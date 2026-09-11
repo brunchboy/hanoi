@@ -8,6 +8,15 @@ h2.cite {
     font-style: italic;
 }
 
+.slide {
+    width: 90%;
+    margin: 0 auto 2em;
+    font-size: 28px;
+}
+
+.narrow {
+    width: 70%;
+}
 
 /* Navigation-related styles */
 .navigation {
@@ -30,6 +39,9 @@ h2.cite {
 .navigation .next {
     width: 33%;
     text-align: right;
+}
+.stepHighlight {
+    background-color: yellow;
 }
 
 /* Task and move lists */

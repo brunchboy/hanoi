@@ -109,7 +109,7 @@
   (atom []))
 
 (def move-ms
-  "How many milliseconds to spend animating the movement of a disk
+  "How many milliseconds to spend animating the movement of a ring
   from one post to another."
   1000)
 
@@ -136,20 +136,25 @@
   (let [scale (- 1.0 (js/Math.cos (* fraction js/Math.PI)))]
     (+ start (* (- end start) scale 0.5))))
 
-(defn disk-move-animation-step
+(defn ring-move-animation-step
   "Function used as a browser animation callback to animate the movement
-  of a disk moving from one post to another. State is an atom that was
+  of a ring moving from one post to another. State is an atom that was
   set up to describe the details of the move and keep track of events
   as it evolves, and timestamp is the browser-reported current
-  monotonic time."
-  [state timestamp]
+  monotonic time.
+
+  If `completion` is not `nil`, it will be called once animation is
+  finished."
+  [state completion timestamp]
   (swap! state update :start #(or % timestamp))  ; Capture first timestamp as start.
-  (let [{:keys [disk our-board start canvas
+  (let [{:keys [ring our-board start canvas
                 from-x from-y to-x to-y]} @state
         elapsed                           (- timestamp start)
         fraction                          (/ elapsed move-ms)]
     (if (>= fraction 1.0)
-      (draw canvas @board)  ; We are all done!
+      (do   ; We are all done!
+        (draw canvas @board)
+        (when completion (completion)))
       (let [ctx (.getContext canvas "2d")
             x   (if (< fraction 0.2)
                    from-x
@@ -162,36 +167,41 @@
                   (ramp 25 to-y (/ (- fraction 0.7) 0.3))
                   25))]
         (draw canvas our-board)  ; Start with board minus the ring we are moving.
-        (draw-ring ctx disk x y)
-        (.requestAnimationFrame js/window (partial disk-move-animation-step state))))))
+        (draw-ring ctx ring x y)
+        (.requestAnimationFrame js/window (partial ring-move-animation-step state completion))))))
 
-(defn animate-disk-move
-  "Animate the movement of a disk from one post to another, updating the
-  board state to reflect the result."
-  [from to]
-  (let [from-index      (post-index from)
-        to-index        (post-index to)
-        disk            (first (get @board from-index))]
+(defn animate-ring-move
+  "Animate the movement of a ring from one post to another, updating the
+  board state to reflect the result.
 
-    ;; Move the disk as specified
-    (swap! board (fn [state]
-                   (-> state
-                       (update from-index rest)
-                       (update to-index conj disk))))
+  If `completion` is not `nil`, it will be called once animation is
+  finished."
+  ([from to]
+   (animate-ring-move from to nil))
+  ([from to completion]
+   (let [from-index      (post-index from)
+         to-index        (post-index to)
+         ring            (first (get @board from-index))]
 
-    ;; Run the animation of that move in the browser.
-    (let [canvas    (.getElementById js/document "state")
-          w         (.-width canvas)
-          h         (.-height canvas)
-          our-board (update @board to-index rest) ; Omit the disk we are moving
-          move      (atom {:from-x    (* w (post-positions from-index))
-                           :from-y    (ring-y h (inc (count (get our-board from-index))))
-                           :to-x      (* w (post-positions to-index))
-                           :to-y      (ring-y h (inc (count (get our-board to-index))))
-                           :disk      disk
-                           :our-board our-board
-                           :canvas    canvas})]
-      (.requestAnimationFrame js/window (partial disk-move-animation-step move)))))
+     ;; Move the ring as specified
+     (swap! board (fn [state]
+                    (-> state
+                        (update from-index rest)
+                        (update to-index conj ring))))
+
+     ;; Run the animation of that move in the browser.
+     (let [canvas    (.getElementById js/document "state")
+           w         (.-width canvas)
+           h         (.-height canvas)
+           our-board (update @board to-index rest) ; Omit the ring we are moving
+           move      (atom {:from-x    (* w (post-positions from-index))
+                            :from-y    (ring-y h (inc (count (get our-board from-index))))
+                            :to-x      (* w (post-positions to-index))
+                            :to-y      (ring-y h (inc (count (get our-board to-index))))
+                            :ring      ring
+                            :our-board our-board
+                            :canvas    canvas})]
+       (.requestAnimationFrame js/window (partial ring-move-animation-step move completion))))))
 
 (defn reset-board
   "Helper function to reset the board and draw its initial state, for a

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Towers of Hanoi</title>
+
+    <link rel="stylesheet" href="css/main.css"/>
+    <script src="js/scittle.js" type="application/javascript"></script>
+    <script>var SCITTLE_NREPL_WEBSOCKET_PORT = 1340;</script>
+    <script src="js/scittle.nrepl.js" type="application/javascript"></script>
+    <script src="cljs/nav.cljs" type="application/x-scittle"></script>
+    <script src="cljs/board.cljs" type="application/x-scittle"></script>
+    <script src="cljs/rules.cljs" type="application/x-scittle"></script>
+  </head>
+
+  <body>
+    <h1>Towers of Hanoi: Rules</h1>
+    <center>
+      <canvas id="state" width="600" height="400"></canvas>
+    </center>
+    <div class="slide narrow">
+      <h3>Goal</h3>
+      <span id="goalStep">Move the tower from post A to post B.</span>
+      <h3>Restrictions</h3>
+      <ul>
+        <li><span id="oneRingStep">Can only move one ring at a time.</span></li>
+        <li><spen id="sizeStep">Cannot place a ring on one that is smaller.</span></li>
+      </ul>
+    </div>
+    <div id="navigation"></div>
+
+  </body>
+</html>

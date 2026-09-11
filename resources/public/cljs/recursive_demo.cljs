@@ -75,7 +75,7 @@
 (defn expand-hanoi
   "Given a hanoi task, return its expansion, either a series of steps
   involving smaller hanoi tasks and a move, or for the base case of
-  one disk, a single move."
+  one ring, a single move."
   [n from to]
   (if (< n 2)
     [(list 'move from to)] ; We have reached the base case; terminate.
@@ -91,8 +91,8 @@
         moves           (.getElementById js/document "moves")]
     (.insertAdjacentHTML moves "beforeend" (str "<li>" from " → " to "</li>"))
 
-    ;; Move the disk as specified
-    (board/animate-disk-move from to)
+    ;; Move the ring as specified
+    (board/animate-ring-move from to)
 
     ;; Fade out and drop the task that caused this move.
     (swap! tasks rest)
@@ -105,7 +105,7 @@
 
 (defn run-top-task
   "Looks at the top of the task stack and takes the appropriate action,
-  either recursively expanding it or moving a disk."
+  either recursively expanding it or moving a ring."
   []
   (when-let [[action & args] (first @tasks)]
     (case action

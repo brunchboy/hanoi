@@ -15,51 +15,52 @@
   </head>
 
   <body>
-    <table>
-      <thead>
-        <tr>
-          <th>State</th>
-          <th>Tasks</th>
-          <th>Moves</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>
-            <canvas id="state" width="600" height="400"></canvas>
-          </td>
-          <td>
-            <div class="scrollableAreaContainer">
-              <div class="scrollableTaskContainer">
-                <ul id="tasks" class="scrollableTasks">
-                </ul>
+    <div class="slide">
+      <table>
+        <thead>
+          <tr>
+            <th>State</th>
+            <th>Tasks</th>
+            <th>Moves</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <canvas id="state" width="600" height="400"></canvas>
+            </td>
+            <td>
+              <div class="scrollableAreaContainer">
+                <div class="scrollableTaskContainer">
+                  <ul id="tasks" class="scrollableTasks">
+                  </ul>
+                </div>
               </div>
-            </div>
-          </td>
-          <td>
-            <div class="scrollableAreaContainer">
-              <div class="scrollableMoveContainer">
-                <ul id="moves" class="scrollableMoves">
-                </ul>
+            </td>
+            <td>
+              <div class="scrollableAreaContainer">
+                <div class="scrollableMoveContainer">
+                  <ul id="moves" class="scrollableMoves">
+                  </ul>
+                </div>
               </div>
-            </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <p>
+        <label for="numRings">Number of rings:</label>
+        <input id="numRings" type="number" min="1" max="10" value="10" />
+        <button type="button" onclick="resetBoard()">Reset Board</button>
+      </p>
 
-    <p>
-      <label for="numRings">Number of rings:</label>
-      <input id="numRings" type="number" min="1" max="10" value="10" />
-      <button type="button" onclick="resetBoard()">Reset Board</button>
-    </p>
-
-    <p>
-      <button onclick="showNotes()">Show Notes</button>
-      &nbsp;&nbsp;
-      <button id="stepButton" type="button" onclick="runStep()">Step</button>
-    </p>
+      <p>
+        <button onclick="showNotes()">Show Notes</button>
+        &nbsp;&nbsp;
+        <button id="stepButton" type="button" onclick="runStep()">Step</button>
+      </p>
+    </div>
 
     <div id="navigation"></div>
 

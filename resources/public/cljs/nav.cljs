@@ -1,9 +1,11 @@
 (ns nav
-  (:require [clojure.string :as str]))
+  (:require [clojure.set :as set]
+            [clojure.string :as str]))
 
 (def index
   "Lists the pages that make up the presentation, along with their titles."
   [["index.html" "Title"]
+   ["rules.html" "Rules"]
    ["recursive_demo.html" "The Recursive Solution"]])
 
 (defn identify-page
@@ -21,6 +23,33 @@
 (def step
   "Holds the step number we have reached, for multi-step pages."
   (atom 1))
+
+(def max-step
+  "Holds the maximum step number, for multi-step pages."
+  (atom 1))
+
+(def step-highlights
+  "Holds an array of element IDs to be highlighted for each step,
+  starting with step 1, for multi-step pages. This is done by adding
+  the CSS class stepHighlight to the document element with that ID
+  when the step is reached, and removing that class from the other
+  elements in the list. A list position can be `nil` if no
+  highlighting should take place for that step.
+
+  If an element should be highlighted when the page first loads, that
+  should be arranged in the initial HTML, or `highlight-step` should
+  be called once the page has fully loaded."
+  (atom []))
+
+(def step-functions
+  "Holds an array of functions to be called for each step, for example
+  to perform animations. A list position can be `nil` if no function
+  need be called for that step.
+
+  As with step-highlights, if an animation is needed for the first
+  step, the function can be called directly by the page, or
+  `animate-step` should be called once the page has fully loaded."
+  (atom []))
 
 (def notes-window
   "Will hold the speaker notes window when created."
@@ -73,6 +102,35 @@
     (when (not= old-val notes)
       (.log js/console "notes window reattached")
       (update-notes))))
+
+(defn highlight-step
+  "Arranges for the appropriate page element to be highlighted given the
+  current step number."
+  []
+  (let [current-id (get @step-highlights (dec @step))
+        other-ids  (set/difference (set (filter identity @step-highlights)) (when current-id #{current-id}))]
+    (when current-id
+      (when-let [current (.getElementById js/document current-id)]
+        (.add (.-classList current) "stepHighlight")))
+    (doseq [id other-ids]
+      (when-let [other (.getElementById js/document id)]
+        (.remove (.-classList other) "stepHighlight")))))
+
+(defn animate-step
+  "Calls the step function configured for the current step, if there is
+  one."
+  []
+  (when-let [f (get @step-functions (dec @step))]
+    (f)))
+
+(defn next-step
+  "Move to the next step of a multi-step page."
+  []
+  (let [old @step
+        new (swap! step (fn [n] (min @max-step (inc n))))]
+    (when (not= old new)
+      (highlight-step)
+      (animate-step))))
 
 ;; export functions to use from JavaScript:
 (set! (.-showNotes js/window) show-notes)
@@ -142,4 +200,5 @@
                        "Home"       (show-notes)
                        "ArrowLeft"  (move-page -1)
                        "ArrowRight" (move-page 1)
+                       "Enter"      (next-step)
                        (.log js/console event))))

@@ -105,7 +105,7 @@
 
 (def board
   "Holds the state of the puzzle board, as a vector of three posts, each
-  of which is a list of disc numbers from top to bottom."
+  of which is a list of ring numbers from top to bottom."
   (atom []))
 
 (def move-ms
@@ -195,7 +195,7 @@
 
 (defn reset-board
   "Helper function to reset the board and draw its initial state, for a
-  specified number of discs, which must be from 1 to 10."
-  [num-discs]
-  (reset! board [(range num-discs) '() '()])
+  specified number of rings, which must be from 1 to 10."
+  [num-rings]
+  (reset! board [(range num-rings) '() '()])
   (draw-current-board-state))

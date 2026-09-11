@@ -117,7 +117,7 @@
 (defn reset-board
   "Helper function to reset the board and draw its initial state."
   []
-  (let [num (parse-long (.-value (.getElementById js/document "numDiscs")))]
+  (let [num (parse-long (.-value (.getElementById js/document "numRings")))]
     (board/reset-board num)
     (reset! tasks (list (list 'hanoi num 'A 'B))))
   (format-tasks)

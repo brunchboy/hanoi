@@ -128,3 +128,18 @@
                (js/promise resolve nil))))
     (.then (fn [text] (create-navigation text)))
     (.catch (fn [e] (.log js/console e "Problem loading navigation."))))
+
+(defn move-page
+  "Helper function to navigate to a relative page, used by arrow key
+  support below."
+  [offset]
+  (when-let [[file] (get index (+ page offset -1))]
+    (set! (.-href (.-location js/window)) file)))
+
+(.addEventListener js/window "keydown"
+                   (fn [event]
+                     (case (.-code event)
+                       "Home"       (show-notes)
+                       "ArrowLeft"  (move-page -1)
+                       "ArrowRight" (move-page 1)
+                       (.log js/console event))))

@@ -95,11 +95,11 @@
     (.stroke ctx)
 
     ;; Draw the rings
-    (doseq [[post x]      (map (fn [itm pos] [itm (* w pos)]) posts post-positions)
-            [ring height] (map-indexed (fn [idx itm]
-                                         [itm (ring-y h (- (count post) idx))])
-                                       post)]
-      (draw-ring ctx ring x height))
+    (doseq [[post x] (map (fn [itm pos] [itm (* w pos)]) posts post-positions)
+            [ring y] (map-indexed (fn [idx itm]
+                                    [itm (ring-y h (- (count post) idx))])
+                                  post)]
+      (draw-ring ctx ring x y))
 
     (.restore ctx)))
 
@@ -202,6 +202,77 @@
                             :our-board our-board
                             :canvas    canvas})]
        (.requestAnimationFrame js/window (partial ring-move-animation-step move completion))))))
+
+(defn tower-teleportation-animation-step
+  "Function used as a browser animation callback to animate the movement
+  of a ring moving from one post to another. State is an atom that was
+  set up to describe the details of the move and keep track of events
+  as it evolves, and timestamp is the browser-reported current
+  monotonic time.
+
+  If `completion` is not `nil`, it will be called once animation is
+  finished."
+  [state completion timestamp]
+  (swap! state update :start #(or % timestamp))  ; Capture first timestamp as start.
+  (let [{:keys [rings our-board start canvas
+                from-index to-index]} @state
+        elapsed                       (- timestamp start)
+        fraction                      (/ elapsed move-ms)]
+    (if (>= fraction 1.0)
+      (do                               ; We are all done!
+        (draw canvas @board)
+        (when completion (completion)))
+      (let [ctx (.getContext canvas "2d")
+            w   (.-width canvas)
+            h   (.-height canvas)]
+        (draw canvas our-board) ; Start with board minus the ring we are moving.
+        (.save ctx)
+        (let [x          (* w (get post-positions from-index))  ; Draw the outgoing rings
+              ring-count (+ (count rings) (count (get our-board from-index)))]
+          (set! (.-globalAlpha ctx) (- 1.0 fraction))
+          (doseq [[ring y] (map-indexed (fn [idx itm]
+                                          [itm (ring-y h (- ring-count idx))])
+                                        rings)]
+            #_(.log js/console ring-count ring x y)
+            (draw-ring ctx ring x y)))
+        (let [x          (* w (get post-positions to-index))  ; Draw the incoming rings
+              ring-count (+ (count rings) (count (get our-board to-index)))]
+          (set! (.-globalAlpha ctx) fraction)
+          (doseq [[ring y] (map-indexed (fn [idx itm]
+                                          [itm (ring-y h (- ring-count idx))])
+                                        rings)]
+            (draw-ring ctx ring x y)))
+        (.restore ctx)
+        (.requestAnimationFrame js/window (partial tower-teleportation-animation-step state completion))))))
+
+(defn animate-tower-teleportation
+  "Animate the fading of multiple rings from one post to another, when
+  we are exploring our way towards a solution to the puzzle.
+
+  If `completion` is not `nil`, it will be called once animation is
+  finished."
+  ([from to num-rings]
+   (animate-tower-teleportation from to num-rings nil))
+  ([from to num-rings completion]
+   (let [from-index (post-index from)
+         to-index   (post-index to)
+         rings      (take num-rings (get @board from-index))]
+
+     ;; Move the rings as specified
+     (swap! board (fn [state]
+                    (-> state
+                        (update from-index (partial drop num-rings))
+                        (update to-index (partial concat rings)))))
+
+     ;; Run the animation of that move in the browser.
+     (let [canvas    (.getElementById js/document "state")
+           our-board (update @board to-index (partial drop num-rings)) ; Omit the rings we are moving
+           move      (atom {:from-index from-index
+                            :to-index   to-index
+                            :rings      rings
+                            :our-board  our-board
+                            :canvas     canvas})]
+       (.requestAnimationFrame js/window (partial tower-teleportation-animation-step move completion))))))
 
 (defn reset-board
   "Helper function to reset the board and draw its initial state, for a

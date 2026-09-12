@@ -2,14 +2,15 @@
   (:require [board]
             [nav]))
 
-(def fade-ms
-  "How many milliseconds to wait for values to fade in or out when
-  animating steps."
-  500)
+(defn animate-goal
+  "Moves the whole tower without showing how."
+  []
+  (board/animate-tower-teleportation 'A 'B 10))
 
 (defn animate-legal-moves
   "Moves a couple rings in legal ways."
   []
+  (board/reset-board 10)
   (board/animate-ring-move 'A 'B #(board/animate-ring-move 'A 'C)))
 
 (defn mark-b-wrong
@@ -41,4 +42,4 @@
 
 (reset! nav/max-step 4)
 (reset! nav/step-highlights [nil "goalStep" "oneRingStep" "sizeStep"])
-(reset! nav/step-functions [nil nil animate-legal-moves animate-illegal-move])
+(reset! nav/step-functions [nil animate-goal animate-legal-moves animate-illegal-move])

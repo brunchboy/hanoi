@@ -126,15 +126,24 @@
 (defn next-step
   "Move to the next step of a multi-step page."
   []
-  (let [old @step
-        new (swap! step (fn [n] (min @max-step (inc n))))]
-    (when (not= old new)
-      (highlight-step)
-      (let [step-number (.getElementById js/document "step-number")]
-        (set! (.-innerText step-number) new))
-      (let [step-button (.getElementById js/document "step-button")]
-        (set! (.-disabled step-button) (>= new @max-step)))
-      (animate-step))))
+  (if @max-step
+    (let [old @step  ; We are handling the steps.
+          new (swap! step (fn [n] (min @max-step (inc n))))]
+      (when (not= old new)
+        (highlight-step)
+        (let [step-number (.getElementById js/document "step-number")]
+          (set! (.-innerText step-number) new))
+        (let [step-button (.getElementById js/document "step-button")]
+          (set! (.-disabled step-button) (>= new @max-step)))
+        (animate-step)))
+    (.nextStep js/window)))  ; Custom page code is handling the steps.
+
+(defn set-step
+  "Set the step number, for a page that is doing this manually."
+  [n]
+  (reset! step n)
+  (let [step-number (.getElementById js/document "step-number")]
+    (set! (.-innerText step-number) n)))
 
 ;; export functions to use from JavaScript:
 (set! (.-showNotes js/window) show-notes)

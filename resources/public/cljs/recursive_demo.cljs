@@ -1,5 +1,6 @@
 (ns recursive-demo
-  (:require [board]))
+  (:require [board]
+            [nav]))
 
 (def tasks
   "Holds the stack of tasks to be performed, as a list of
@@ -15,7 +16,7 @@
   "Makes sure the Step button is enabled if there are tasks in the
   stack, and disabled otherwise."
   []
-  (let [button (.getElementById js/document "stepButton")]
+  (let [button (.getElementById js/document "step-button")]
     (set! (.-disabled button) (empty? @tasks))))
 
 (defn format-tasks
@@ -108,11 +109,12 @@
   either recursively expanding it or moving a ring."
   []
   (when-let [[action & args] (first @tasks)]
+    (nav/set-step (inc @nav/step))
     (case action
       hanoi (animate-top-expansion (apply expand-hanoi args))
       move  (apply animate-top-move args))))
 
-(set! (.-runStep js/window) run-top-task)
+(set! (.-nextStep js/window) run-top-task)
 
 (defn reset-board
   "Helper function to reset the board and draw its initial state."
@@ -122,7 +124,12 @@
     (reset! tasks (list (list 'hanoi num 'A 'B))))
   (format-tasks)
   (set! (.-innerHTML (.getElementById js/document "moves")) "")
+  (nav/set-step 1)
   (update-step-button))
 
 (set! (.-resetBoard js/window) reset-board)
-(reset-board)
+
+;; Let the navigation interface know there are an indeterminate number of steps to run, which we control.
+(reset! nav/max-step nil)
+(nav/run-once-loaded nav/show-step-ui)
+(nav/run-once-loaded reset-board)

@@ -40,6 +40,9 @@ h2.cite {
     width: 33%;
     text-align: right;
 }
+.navigation .hidden {
+    display: none;
+}
 .stepHighlight {
     background-color: yellow;
 }

@@ -130,6 +130,10 @@
         new (swap! step (fn [n] (min @max-step (inc n))))]
     (when (not= old new)
       (highlight-step)
+      (let [step-number (.getElementById js/document "step-number")]
+        (set! (.-innerText step-number) new))
+      (let [step-button (.getElementById js/document "step-button")]
+        (set! (.-disabled step-button) (>= new @max-step)))
       (animate-step))))
 
 ;; export functions to use from JavaScript:
@@ -138,6 +142,33 @@
 
 
 ;; Install the navigation section in the page.
+
+(def load-state
+  "Keeps track of whether the section has finished loading, and allows
+  functions to be queued for calling once loading completes."
+  (atom {:loaded false
+         :fns    []}))
+
+(defn run-once-loaded
+  "Calls a function once the navigation section has finished loading."
+  [f]
+  (let [loaded? (:loaded (swap! load-state (fn [state]
+                                             (if (:loaded state)
+                                               state
+                                               (update state :fns conj f)))))]
+    (when loaded? (f))))  ; It was already loaded, we just call the function now.
+
+(defn show-step-ui
+  "Reveal the step navigation UI if the page has multiple steps."
+  []
+  (when (not= 1 @max-step)
+    (let [step-count (.getElementById js/document "step-count")]
+      (set! (.-innerText step-count)
+            (if @max-step
+              (str " of " @max-step)
+              "")))
+    (when @max-step (set! (.-nextStep js/window) next-step)) ; We can implement the Next button.
+    (.remove (.-classList (.getElementById js/document "step-row")) "hidden")))
 
 (defn create-navigation
   "Loads the HTML of the navigation section into the page."
@@ -175,7 +206,11 @@
               (.appendChild select option)))
           (.addEventListener select "change"
                              (fn [event]
-                               (set! (.-href (.-location js/window)) (.-value (.-target event)))))))
+                               (set! (.-href (.-location js/window)) (.-value (.-target event))))))
+
+        ;; Indicate we have finished loading, and run any deferred functions that may have been registered.
+        (let [fns (:fns (swap! load-state update :loaded (constantly true)))]
+          (doseq [f fns] (f))))
       (set! (.-innerHTML navigation) "Unable to load navigation section."))
     (.log js/console "Unable to find navigation div!")))
 
@@ -194,6 +229,7 @@
   (when-let [[file] (get index (+ page offset -1))]
     (set! (.-href (.-location js/window)) file)))
 
+;; Add keyboard navigation listeners.
 (.addEventListener js/window "keydown"
                    (fn [event]
                      (case (.-code event)

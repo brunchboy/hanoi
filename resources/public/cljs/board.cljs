@@ -233,7 +233,6 @@
           (doseq [[ring y] (map-indexed (fn [idx itm]
                                           [itm (ring-y h (- ring-count idx))])
                                         rings)]
-            #_(.log js/console ring-count ring x y)
             (draw-ring ctx ring x y)))
         (let [x          (* w (get post-positions to-index))  ; Draw the incoming rings
               ring-count (+ (count rings) (count (get our-board to-index)))]

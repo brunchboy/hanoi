@@ -43,3 +43,4 @@
 (reset! nav/max-step 4)
 (reset! nav/step-highlights [nil "goalStep" "oneRingStep" "sizeStep"])
 (reset! nav/step-functions [nil animate-goal animate-legal-moves animate-illegal-move])
+(nav/run-once-loaded nav/show-step-ui)

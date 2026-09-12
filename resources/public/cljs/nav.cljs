@@ -6,6 +6,7 @@
   "Lists the pages that make up the presentation, along with their titles."
   [["index.html" "Title"]
    ["rules.html" "Rules"]
+   ["background.html" "Background"]
    ["recursive_demo.html" "The Recursive Solution"]])
 
 (defn identify-page

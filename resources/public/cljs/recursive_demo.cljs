@@ -10,14 +10,23 @@
 (def fade-ms
   "How many milliseconds to wait for values to fade in or out when
   animating steps."
-  500)  ;; TODO, when changing this, change CSS to match; maybe tie with code?
+  (atom 500))  ;; TODO, when changing this, change CSS to match; maybe tie with code?
+
+(def auto-step
+  "Controls whether the next step is automatically run when one ends."
+  (atom false))
+
+(declare run-top-task)
 
 (defn update-step-button
   "Makes sure the Step button is enabled if there are tasks in the
-  stack, and disabled otherwise."
+  stack, and disabled otherwise. If auto-step is true, run the next
+  task."
   []
-  (let [button (.getElementById js/document "step-button")]
-    (set! (.-disabled button) (empty? @tasks))))
+  (let [button (.getElementById js/document "step-button")
+        done   (empty? @tasks)]
+    (set! (.-disabled button) done)
+    (when (and @auto-step (not done)) (run-top-task))))
 
 (defn format-tasks
   "Formats the task list as a series of list items on the page."
@@ -44,14 +53,14 @@
                                 (set! (.-opacity (.-style (.-previousElementSibling expanding-element))) 1)
                                 (.setTimeout js/window
                                              #(animate-tasks-in (rest tasks-left) all-tasks expanding-element)
-                                             (quot fade-ms 5)))))
+                                             (quot @fade-ms 5)))))
     (if all-tasks
       (do
         (swap! tasks #(apply concat all-tasks (list (rest %))))
         (set! (.-opacity (.-style expanding-element)) 0)
         (.setTimeout js/window
                      #(animate-tasks-in [] nil expanding-element)
-                     fade-ms))
+                     @fade-ms))
       (do (.remove expanding-element)
           (update-step-button)))))
 
@@ -93,22 +102,21 @@
     (.insertAdjacentHTML moves "beforeend" (str "<li>" from " → " to "</li>"))
 
     ;; Move the ring as specified
-    (board/animate-ring-move from to)
+    (board/animate-ring-move from to update-step-button)
 
     ;; Fade out and drop the task that caused this move.
     (swap! tasks rest)
     (set! (.-opacity (.-style running-element)) 0)
     (.setTimeout js/window
-                 (fn []
-                     (.remove running-element)
-                   (update-step-button))
-                 fade-ms)))
+                 (fn [] (.remove running-element))
+                 @fade-ms)))
 
 (defn run-top-task
   "Looks at the top of the task stack and takes the appropriate action,
   either recursively expanding it or moving a ring."
   []
   (when-let [[action & args] (first @tasks)]
+    (set! (.-disabled (.getElementById js/document "step-button")) true)
     (nav/set-step (inc @nav/step))
     (case action
       hanoi (animate-top-expansion (apply expand-hanoi args))
@@ -119,7 +127,7 @@
 (defn reset-board
   "Helper function to reset the board and draw its initial state."
   []
-  (let [num (parse-long (.-value (.getElementById js/document "numRings")))]
+  (let [num (parse-long (.-value (.getElementById js/document "num-rings")))]
     (board/reset-board num)
     (reset! tasks (list (list 'hanoi num 'A 'B))))
   (format-tasks)
@@ -128,6 +136,18 @@
   (update-step-button))
 
 (set! (.-resetBoard js/window) reset-board)
+
+;; Connect the speed slider and auto-step checkbox.
+(let [slider (.getElementById js/document "fade-ms")]
+  (.addEventListener slider "input"
+                     (fn [event]
+                       (let [val (parse-long (.-value (.-target event)))]
+                         (reset! fade-ms val)
+                         (reset! board/move-ms (* 2 val))))))
+(let [checkbox (.getElementById js/document "auto-step")]
+  (.addEventListener checkbox "input"
+                     (fn [event]
+                       (reset! auto-step (.-checked (.-target event))))))
 
 ;; Let the navigation interface know there are an indeterminate number of steps to run, which we control.
 (reset! nav/max-step nil)

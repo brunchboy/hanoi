@@ -111,7 +111,7 @@
 (def move-ms
   "How many milliseconds to spend animating the movement of a ring
   from one post to another."
-  1000)
+  (atom 1000))
 
 (defn other-post
   "Given a pair of posts, return the one that was not mentioned."
@@ -150,7 +150,7 @@
   (let [{:keys [ring our-board start canvas
                 from-x from-y to-x to-y]} @state
         elapsed                           (- timestamp start)
-        fraction                          (/ elapsed move-ms)]
+        fraction                          (/ elapsed @move-ms)]
     (if (>= fraction 1.0)
       (do   ; We are all done!
         (draw canvas @board)
@@ -217,7 +217,7 @@
   (let [{:keys [rings our-board start canvas
                 from-index to-index]} @state
         elapsed                       (- timestamp start)
-        fraction                      (/ elapsed move-ms)]
+        fraction                      (/ elapsed @move-ms)]
     (if (>= fraction 1.0)
       (do                               ; We are all done!
         (draw canvas @board)

@@ -86,6 +86,10 @@ li {
     list-style-type: disc;
     color: green;
 }
+.scrollableTasks li.suspended {
+    list-style-type: disc;
+    color: gray;
+}
 .scrollableTasks li.hidden {
     opacity: 0;
 }
@@ -96,4 +100,35 @@ li {
     margin: 5px 0;
     font-family: sans-serif;
     font-size: 20px;
+}
+
+
+/* Code listing styles */
+.slide pre {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+code .keyword {
+    color: purple;
+}
+code .identifier {
+    color: blue;
+}
+code .line-number {
+    color: lightgray;
+}
+code .success {
+    background-color: lightgreen;
+}
+code .failure {
+    background-color: pink;
+}
+code .skipped {
+    text-decoration: line-through red;
+}
+code .running {
+    background-color: yellow;
+}
+code .finished {
+    background-color: lightgray;
 }

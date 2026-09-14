@@ -76,7 +76,7 @@
                        (.text response)
                        (js/Promise.resolve "<p>Perfect, no notes.</p>"))))
             (.then (fn [text] (set-notes-body text)))
-            (.catch (fn [e] (set-notes-body (str "<h2>Problem Loading notes</h2><p>" e "</p>")))))
+            (.catch (fn [e] (set-notes-body (str "<h2>Problem loading notes:</h2><p>" e "</p>")))))
         (-> (js/fetch (str "partials/" (str/replace page-name ".html"
                                                     (str "." @step ".html"))))
             (.then (fn [response]

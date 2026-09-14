@@ -47,7 +47,8 @@
    (animate-task-in task running-element nil))
   ([task running-element completion]
    (swap! tasks conj task)
-   (.insertAdjacentHTML running-element "beforebegin" (str "<li class=hidden>" task "</li>"))
+   (.insertAdjacentHTML running-element "beforebegin" (str "<li class=\"hidden\"><span class=\"calling\">"
+                                                           task "</span></li>"))
    (.requestAnimationFrame js/window
                            (fn [_]
                              (set! (.-opacity (.-style (.-previousElementSibling running-element))) 1)
@@ -64,6 +65,7 @@
         children        (.-children tasks-element)
         running-element (.item children 0)]
     (set! (.-className running-element) "running")
+    (set! (.-innerHTML running-element) (.-innerText running-element))  ; Get rid of calling span.
     running-element))
 
 (defn animate-task-suspending
@@ -76,44 +78,33 @@
     (set! (.-className element) "suspended")))
 
 (defn set-running-state
-  "Updates the Running: text and the code area to reflect the step we
-  are now executing.
+  "Updates the Running: text to reflect the step we are now executing,
+   and resets the code window to its initial styles.
 
   `call` is the function invocation being run.
-  `line`, if not `nil` is the line we are resuming after.
-  `code-partial`, if not `nil` identifies the HTML partial to load for
-  the code area. When `completion` is not `nil` it is a function to
-  call once the state has been set."
-  [call line code-partial completion]
+  `line`, if not `nil` is the line we are resuming after."
+  [call line]
   (let [running (.getElementById js/document "running")]
     (set! (.-innerHTML running) (if (str/blank? call)
                                   "<em>nothing, ready to start</em>"
                                   (str "<code>" call "</code>"
                                        (when line (str " and resuming after line " line))))))
-  (let [code (.getElementById js/document "code")
-        file (when code-partial (str "partials/" code-partial))]
-    (set! (.-innerText code) "")
-    (when file
-      (-> (js/fetch file)
-          (.then (fn [response]
-                   (if (.-ok response)
-                     (.text response)
-                     (js/Promise.resolve (str "<em>Unable to find " file "</em>")))))
-          (.then (fn [text]
-                   (set! (.-innerHTML code) text)
-                   (when completion (completion))))
-          (.catch (fn [e]
-                    (set! (.-innerHTML code) (str "<h3>Problem loading " file ":</h3><p>" e "</p>"))
-                    (when completion (completion))))))))
+  (doseq [id ["all-hanoi" "lines-2-6" "lines-2-3" "test-2" "line-3" "line-4" "test-5" "line-6"]]
+    (let [elem (.getElementById js/document id)]
+      (set! (.-className elem) ""))))
 
 (defn animate-top-move
   "Runs an animation that shows the top task, which is a move, taking
   place."
   [from to]
-  (set-running-state (str "<code>(move " from " " to ")</code>") nil nil nil)
-  (let [running-element (animate-task-starting)
-        moves           (.getElementById js/document "moves")]
+  (set-running-state (str "<code>(move " from " " to ")</code>") nil)
+    (let [running-element (animate-task-starting)
+        moves           (.getElementById js/document "moves")
+        lines-2-3       (.getElementById js/document "lines-2-3")
+        line-4          (.getElementById js/document "line-4")]
     (.insertAdjacentHTML moves "beforeend" (str "<li>" from " → " to "</li>"))
+    (set! (.-className lines-2-3) "finished")
+    (set! (.-className line-4) "inside")
 
     ;; Move the ring as specified
     (board/animate-ring-move from to update-step-button)
@@ -147,11 +138,16 @@
                  (update-step-button))
                @fade-ms))
 
-(defn animate-top-hanoi-continued
-  "Continues the task of `animate-top-hanoi`, below, once the running
-  state has been established asynchronously."
-  [n from to line running-element]
-  (case line
+(defn animate-top-hanoi
+  "Runs an animation that shows the next step of the recursive hanoi
+  algorithm. If `line` is not `nil`, we are resuming a suspended
+  invocation after the specified line."
+  ([n from to]
+   (animate-top-hanoi n from to nil))
+  ([n from to line]
+   (let [running-element (animate-task-starting)]
+     (set-running-state (str "(hanoi " n " " from " " to ")") line)
+     (case line
     nil (let [test   (.getElementById js/document "test-2")
               line-3 (.getElementById js/document "line-3")]
           (set! (.-className test) (if (> n 1) "success" "failure"))
@@ -189,18 +185,7 @@
             (finished-top-hanoi running-element)))
     6   (let [lines-2-6 (.getElementById js/document "lines-2-6")]
           (set! (.-className lines-2-6) "finished")
-          (finished-top-hanoi running-element))))
-
-(defn animate-top-hanoi
-  "Runs an animation that shows the next step of the recursive hanoi
-  algorithm. If `line` is not `nil`, we are resuming a suspended
-  invocation after the specified line."
-  ([n from to]
-   (animate-top-hanoi n from to nil))
-  ([n from to line]
-   (let [running-element (animate-task-starting)]
-     (set-running-state (str "(hanoi " n " " from " " to ")") line "hanoi_code"
-                        #(animate-top-hanoi-continued n from to line running-element)))))
+          (finished-top-hanoi running-element))))))
 
 (defn run-top-task
   "Looks at the top of the task stack and takes the appropriate action,
@@ -223,7 +208,7 @@
     (reset! tasks (list (list 'hanoi num 'A 'B))))
   (format-tasks)
   (set! (.-innerHTML (.getElementById js/document "moves")) "")
-  (set-running-state "" nil nil nil)
+  (set-running-state "" nil)
   (nav/set-step 1)
   (update-step-button))
 

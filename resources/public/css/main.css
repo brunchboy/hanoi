@@ -82,6 +82,9 @@ li {
     list-style-type: circle;
     transition: opacity 500ms, display 500ms allow-discrete;
 }
+.scrollableTasks li .calling {
+    background-color: yellow;
+}
 .scrollableTasks li.running {
     list-style-type: disc;
     color: green;
@@ -130,5 +133,9 @@ code .running {
     background-color: yellow;
 }
 code .finished {
+    background-color: lightgray;
+}
+code .inside {
+    color: green;
     background-color: lightgray;
 }

@@ -7,7 +7,9 @@
   [["index.html" "Title"]
    ["rules.html" "Rules"]
    ["background.html" "Background"]
-   ["recursive_demo.html" "The Recursive Solution"]])
+   ["recursive_intro.html" "The Recursive Algortihm Introduced"]
+   ["base_case.html" "Recursive Algortihm: Base Case"]
+   ["recursive_demo.html" "Recursive Algorithm Demonstration"]])
 
 (defn identify-page
   "Locates the current page in the index so we can determine our page

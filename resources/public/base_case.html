@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Towers of Hanoi: Recursive Algorithm</title>
+
+    <link rel="stylesheet" href="css/main.css"/>
+    <script src="js/scittle.js" type="application/javascript"></script>
+    <script>var SCITTLE_NREPL_WEBSOCKET_PORT = 1340;</script>
+    <script src="js/scittle.nrepl.js" type="application/javascript"></script>
+    <script src="cljs/nav.cljs" type="application/x-scittle"></script>
+    <script src="cljs/board.cljs" type="application/x-scittle"></script>
+    <script src="cljs/base_case.cljs" type="application/x-scittle"></script>
+  </head>
+
+  <body>
+    <h1>Towers of Hanoi: Base Case</h1>
+    <center>
+      <canvas id="state" width="600" height="400"></canvas>
+    </center>
+    <div class="slide narrow">
+      <p>
+        If the tower we are trying to move is only one ring tall, we can
+        simply move it in one step:
+      </p>
+      <p><code id="code">(hanoi 1 'A 'B)</code></p>
+    </div>
+
+    <div id="navigation"></div>
+
+  </body>
+</html>

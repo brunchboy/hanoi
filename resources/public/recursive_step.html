@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Towers of Hanoi: Recursive Algorithm</title>
+
+    <link rel="stylesheet" href="css/main.css"/>
+    <script src="js/scittle.js" type="application/javascript"></script>
+    <script>var SCITTLE_NREPL_WEBSOCKET_PORT = 1340;</script>
+    <script src="js/scittle.nrepl.js" type="application/javascript"></script>
+    <script src="cljs/nav.cljs" type="application/x-scittle"></script>
+    <script src="cljs/board.cljs" type="application/x-scittle"></script>
+    <script src="cljs/recursive_step.cljs" type="application/x-scittle"></script>
+  </head>
+
+  <body>
+    <h1>Towers of Hanoi: Recursive Step</h1>
+    <center>
+      <canvas id="state" width="600" height="400"></canvas>
+    </center>
+    <div class="slide narrow">
+      <p>
+        If the tower we are trying to move is more than one ring tall
+        (say <em>num-rings</em>), we can
+        <ul class="compact">
+          <li>(recursively) move all but the biggest ring out of the way, then</li>
+          <li>move that ring to the target post, and</li>
+          <li>move the smaller tower on top of it:</li>
+        </ul>
+      </p>
+      <p><pre><code><span id="aside">(hanoi (dec num-rings) from (other-post from to))</span>
+<span id="move">(move from to)</span>
+<span id="finale">(hanoi (dec num-rings) (other-post from to) to)</span></code></pre>
+    </div>
+
+    <div id="navigation"></div>
+
+  </body>
+</html>

@@ -14,6 +14,10 @@ li {
     margin-top: 0.25em;
     margin-bottom: 0.5em;
 }
+.compact li {
+    margin-top: 0;
+    margin-bottom: 0;
+}
 dd {
     margin-bottom: 1em;
 }

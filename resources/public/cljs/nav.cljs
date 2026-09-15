@@ -9,6 +9,8 @@
    ["background.html" "Background"]
    ["recursive_intro.html" "The Recursive Algortihm Introduced"]
    ["base_case.html" "Recursive Algortihm: Base Case"]
+   ["recursive_step.html" "Recursive Algortihm: Recursive Step"]
+   ["recursion_works.html" "Recursive Algortihm: Can it Work?"]
    ["recursive_demo.html" "Recursive Algorithm Demonstration"]])
 
 (defn identify-page

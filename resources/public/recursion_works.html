@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Towers of Hanoi: Recursive Algorithm</title>
+
+    <link rel="stylesheet" href="css/main.css"/>
+    <script src="js/scittle.js" type="application/javascript"></script>
+    <script>var SCITTLE_NREPL_WEBSOCKET_PORT = 1340;</script>
+    <script src="js/scittle.nrepl.js" type="application/javascript"></script>
+    <script src="cljs/nav.cljs" type="application/x-scittle"></script>
+  </head>
+
+  <body>
+    <div class="slide narrow">
+      <h1>Can The Recursive Algorithm Work?</h1>
+      <ul>
+        <li>
+          It may seem like we’re cheating here: recursive algorithms
+          can feel like that until you prove to yourself they work.
+        </li>
+        <li>
+          In programming, the very idea of recursion (or even the
+          simpler notion of “re-entrant” code, which could be in use
+          more than once at the same time even if it was not itself
+          recursive) was once controversial, and difficult to
+          implement.
+        </li>
+        <li>
+          You have to keep track of all the variables that a recursive
+          function uses in a way that keeps each
+          simultaneously-running copy from interfering with the
+          others, and remember where you’ve reached in each instance
+          for when you return back to it.
+        </li>
+        <li>
+          Now, essentially all languages (and processor architectures)
+          support it, through the use of call stacks and
+          stack-allocated variables.
+        </li>
+        <li>
+          Of course, if you don’t get your base case or algorithm
+          right, you can run out of (overflow) your stack space, hence
+          the popular programming help
+          site, <code>stackoverflow.com</code>.
+        </li>
+        <li>
+          Let’s watch it in action!
+        </li>
+      </ul>
+    </div>
+
+    <div id="navigation"></div>
+
+  </body>
+</html>

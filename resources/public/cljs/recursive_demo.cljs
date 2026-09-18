@@ -81,33 +81,43 @@
   "Updates the Running: text to reflect the step we are now executing,
    and resets the code window to its initial styles.
 
-  `call` is the function invocation being run.
+  `call` is the function invocation being run, if any.
   `line`, if not `nil` is the line we are resuming after."
   [call line]
   (let [running (.getElementById js/document "running")]
     (set! (.-innerHTML running) (if (str/blank? call)
-                                  "<em>nothing, ready to start</em>"
+                                  (str "<em>nothing, "
+                                       (if (empty? @tasks) "solved" "ready to start")
+                                       "</em>")
+
                                   (str "<code>" call "</code>"
                                        (when line (str " and resuming after line " line))))))
   (doseq [id ["all-hanoi" "lines-2-6" "lines-2-3" "test-2" "line-3" "line-4" "test-5" "line-6"]]
     (let [elem (.getElementById js/document id)]
       (set! (.-className elem) ""))))
 
+(defn format-move
+  "Helper function to generate the HTML describing a ring move."
+  [from to ring]
+  (str "<li><span class=\"ring-moved\"><span style=\"color:" (get board/ring-colors ring)
+       "\">Ring " (inc ring) ": </span></span>" from " → " to "</li>"))
+
 (defn animate-top-move
   "Runs an animation that shows the top task, which is a move, taking
   place."
   [from to]
   (set-running-state (str "<code>(move " from " " to ")</code>") nil)
-    (let [running-element (animate-task-starting)
+  (let [running-element (animate-task-starting)
         moves           (.getElementById js/document "moves")
         lines-2-3       (.getElementById js/document "lines-2-3")
         line-4          (.getElementById js/document "line-4")]
-    (.insertAdjacentHTML moves "beforeend" (str "<li>" from " → " to "</li>"))
+
     (set! (.-className lines-2-3) "finished")
     (set! (.-className line-4) "inside")
 
-    ;; Move the ring as specified
-    (board/animate-ring-move from to update-step-button)
+    ;; Move the ring as specified, and record it.
+    (let [ring (board/animate-ring-move from to update-step-button)]
+      (.insertAdjacentHTML moves "beforeend" (format-move from to ring)))
 
     ;; Fade out and drop the task that caused this move.
     (swap! tasks rest)
@@ -203,16 +213,41 @@
 (defn reset-board
   "Helper function to reset the board and draw its initial state."
   []
-  (let [num (parse-long (.-value (.getElementById js/document "num-rings")))]
+  (let [num   (parse-long (.-value (.getElementById js/document "num-rings")))
+        moves (.getElementById js/document "moves")]
     (board/reset-board num)
-    (reset! tasks (list (list 'hanoi num 'A 'B))))
+    (reset! tasks (list (list 'hanoi num 'A 'B)))
+    (set! (.-innerHTML moves) ""))
   (format-tasks)
-  (set! (.-innerHTML (.getElementById js/document "moves")) "")
   (set-running-state "" nil)
   (nav/set-step 1)
   (update-step-button))
 
 (set! (.-resetBoard js/window) reset-board)
+
+(defn hanoi-fast
+  "Performs a non-animated solution, returning the formatted move list."
+  [num-rings from to]
+  (str
+   (when (> num-rings 1) (hanoi-fast (dec num-rings) from (board/other-post from to)))
+   (let [ring (board/move-ring (board/post-index from) (board/post-index to))]
+     (format-move from to ring))
+   (when (> num-rings 1) (hanoi-fast (dec num-rings) (board/other-post from to) to))))
+
+(defn solve
+  "Helper function to quickly get to a solved state."
+  []
+  (let [num   (parse-long (.-value (.getElementById js/document "num-rings")))
+        moves (.getElementById js/document "moves")]
+    (board/reset-board num)
+    (reset! tasks '())
+    (set-running-state "" nil)
+    (set! (.-innerHTML moves) (hanoi-fast num 'A 'B))
+    (board/draw-current-board-state)
+    (nav/set-step (* 4 (dec (.pow js/Math 2 num))))
+    (update-step-button)))
+
+(set! (.-solve js/window) solve)
 
 ;; Connect the speed slider and auto-step checkbox.
 (let [slider (.getElementById js/document "fade-ms")]

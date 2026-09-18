@@ -170,38 +170,45 @@
         (draw-ring ctx ring x y)
         (.requestAnimationFrame js/window (partial ring-move-animation-step state completion))))))
 
-(defn animate-ring-move
-  "Animate the movement of a ring from one post to another, updating the
+(defn move-ring
+  "Performs the actual update of the board atom to reflect a ring moving
+  from one post to another. Returns the number of the ring that moved."
+  [from-index to-index]
+  (let [ring (first (get @board from-index))]
+    (swap! board (fn [state]
+                   (-> state
+                       (update from-index rest)
+                       (update to-index conj ring))))
+    ring))
+
+  (defn animate-ring-move
+    "Animate the movement of a ring from one post to another, updating the
   board state to reflect the result.
 
   If `completion` is not `nil`, it will be called once animation is
-  finished."
-  ([from to]
-   (animate-ring-move from to nil))
-  ([from to completion]
-   (let [from-index      (post-index from)
-         to-index        (post-index to)
-         ring            (first (get @board from-index))]
+  finished. Returns the number of the ring that moved."
+    ([from to]
+     (animate-ring-move from to nil))
+    ([from to completion]
+     (let [from-index (post-index from)
+           to-index   (post-index to)
+           ring       (move-ring from-index to-index)
+           canvas     (.getElementById js/document "state")
+           w          (.-width canvas)
+           h          (.-height canvas)
+           our-board  (update @board to-index rest) ; Omit the ring we are moving
+           move       (atom {:from-x    (* w (post-positions from-index))
+                             :from-y    (ring-y h (inc (count (get our-board from-index))))
+                             :to-x      (* w (post-positions to-index))
+                             :to-y      (ring-y h (inc (count (get our-board to-index))))
+                             :ring      ring
+                             :our-board our-board
+                             :canvas    canvas})]
 
-     ;; Move the ring as specified
-     (swap! board (fn [state]
-                    (-> state
-                        (update from-index rest)
-                        (update to-index conj ring))))
+       ;; Run the animation of the move in the browser.
+       (.requestAnimationFrame js/window (partial ring-move-animation-step move completion))
 
-     ;; Run the animation of that move in the browser.
-     (let [canvas    (.getElementById js/document "state")
-           w         (.-width canvas)
-           h         (.-height canvas)
-           our-board (update @board to-index rest) ; Omit the ring we are moving
-           move      (atom {:from-x    (* w (post-positions from-index))
-                            :from-y    (ring-y h (inc (count (get our-board from-index))))
-                            :to-x      (* w (post-positions to-index))
-                            :to-y      (ring-y h (inc (count (get our-board to-index))))
-                            :ring      ring
-                            :our-board our-board
-                            :canvas    canvas})]
-       (.requestAnimationFrame js/window (partial ring-move-animation-step move completion))))))
+       ring)))
 
 (defn tower-teleportation-animation-step
   "Function used as a browser animation callback to animate the movement

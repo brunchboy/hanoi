@@ -249,6 +249,23 @@
 
 (set! (.-solve js/window) solve)
 
+(def show-rings
+  "Indicates whether ring identities should be displayed in the moves
+  list."
+  (atom false))
+
+(defn toggle-rings-in-moves
+  "Helper function to show or hide the ring identities in the moves
+  list."
+  []
+  (let [show (swap! show-rings not)]
+    (doseq [style-sheet (.-styleSheets js/document)
+            rule        (.-cssRules style-sheet)]
+      (when (= (str/lower-case (.-selectorText rule)) ".scrollablemoves li .ring-moved")
+        (set! (.-display (.-style rule)) (if show "inline" "none"))))))
+
+(set! (.-toggleRings js/window) toggle-rings-in-moves)
+
 ;; Connect the speed slider and auto-step checkbox.
 (let [slider (.getElementById js/document "fade-ms")]
   (.addEventListener slider "input"

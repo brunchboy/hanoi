@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Towers of Hanoi: Recursive Move Count</title>
+
+    <link rel="stylesheet" href="css/main.css"/>
+    <script src="js/scittle.js" type="application/javascript"></script>
+    <script>var SCITTLE_NREPL_WEBSOCKET_PORT = 1340;</script>
+    <script src="js/scittle.nrepl.js" type="application/javascript"></script>
+    <script src="cljs/nav.cljs" type="application/x-scittle"></script>
+  </head>
+
+  <body>
+    <div class="slide narrow">
+      <h1>Moves Needed for Recursive Solution</h1>
+      <ul>
+        <li>
+          The base case of a single ring requires one move.
+        </li>
+        <li>
+          In the recursive case of <em>n</em> rings, we have one
+          recursive call to move <em>n – 1</em> rings out of the way,
+          a single move for the base ring, and then the same recursive
+          call to move the other rings on top of it. So: <br/>
+          <em>hanoi_moves(n) = 2 × hanoi_moves(n – 1) + 1</em>
+        </li>
+        <li>
+          <em>n = 2: 2 × 1 + 1 = 3</em><br/>
+          <em>n = 3: 2 × 3 + 1 = 7</em><br/>
+          <em>n = 4: 2 × 7 + 1 = 15</em><br/>
+          <em>n = 5: 2 × 15 + 1 = 31</em><br/>
+          Continuing: <em>63, 127, 255, 511, 1023</em>…
+        </li>
+        <li>
+          In general, for <em>n</em> rings, <em>2<sup>n</sup> – 1</em> moves.
+        </li>
+        <li>
+          Notice that this, too, is a recursive function with a base
+          case, and we were able to find a pattern and, thereby, a
+          non-recursive solution.
+        </li>
+        <li>
+          My animated demo has four steps per move, so needs <em>4 × (2<sup>n</sup> – 1)</em> steps.
+        </li>
+      </ul>
+    </div>
+
+    <div id="navigation"></div>
+
+  </body>
+</html>

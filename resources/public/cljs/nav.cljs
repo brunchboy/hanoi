@@ -11,7 +11,8 @@
    ["base_case.html" "Recursive Algortihm: Base Case"]
    ["recursive_step.html" "Recursive Algortihm: Recursive Step"]
    ["recursion_works.html" "Recursive Algortihm: Can it Work?"]
-   ["recursive_demo.html" "Recursive Algorithm Demonstration"]])
+   ["recursive_demo.html" "Recursive Algorithm Demonstration"]
+   ["recursive_moves.html" "Recursive Move Count"]])
 
 (defn identify-page
   "Locates the current page in the index so we can determine our page

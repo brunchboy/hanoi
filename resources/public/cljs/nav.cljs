@@ -12,7 +12,8 @@
    ["recursive_step.html" "Recursive Algortihm: Recursive Step"]
    ["recursion_works.html" "Recursive Algortihm: Can it Work?"]
    ["recursive_demo.html" "Recursive Algorithm Demonstration"]
-   ["recursive_moves.html" "Recursive Move Count"]])
+   ["recursive_moves.html" "Recursive Move Count"]
+   ["recursive_manual.html" "Recursion by Hand"]])
 
 (defn identify-page
   "Locates the current page in the index so we can determine our page
@@ -82,8 +83,7 @@
                        (js/Promise.resolve "<p>Perfect, no notes.</p>"))))
             (.then (fn [text] (set-notes-body text)))
             (.catch (fn [e] (set-notes-body (str "<h2>Problem loading notes:</h2><p>" e "</p>")))))
-        (-> (js/fetch (str "partials/" (str/replace page-name ".html"
-                                                    (str "." @step ".html"))))
+        (-> (js/fetch (str/replace page-name ".html" (str "." @step ".html")))
             (.then (fn [response]
                      (if (.-ok response)
                        (.text response)
@@ -136,6 +136,7 @@
     (let [old @step  ; We are handling the steps.
           new (swap! step (fn [n] (min @max-step (inc n))))]
       (when (not= old new)
+        (update-notes)
         (highlight-step)
         (let [step-number (.getElementById js/document "step-number")]
           (set! (.-innerText step-number) new))

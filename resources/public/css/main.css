@@ -72,6 +72,10 @@ dd {
 }
 
 /* Task and move lists */
+.slide table {
+    margin-left: auto;
+    margin-right: auto;
+}
 .scrollableAreaContainer {
     width: 200px;
     height: 400px;
@@ -113,6 +117,55 @@ dd {
 }
 .scrollableMoves li .ring-moved {
     display: none;
+}
+.cardStackContainer {
+    position: relative;
+    width: 450px;
+    height: 400px;
+}
+.card {
+    position: absolute;
+    width: 300px;
+    height: 200px;
+    border: 1px solid black;
+    font-family: cursive;
+    background-color: white;
+    box-shadow: 6px 6px 5px 4px gray;
+    display: none;
+}
+.card p,ul {
+    margin: 5px;
+}
+.card p {
+    text-align: center;
+    text-decoration: underline;
+}
+.card li {
+    margin: 0;
+    list-style-type: "☐";
+}
+.card li.completed {
+    list-style-type: "☑";
+}
+.cardStackContainer #card-1 {
+    top: 45px;
+    left: 50px;
+    z-index: 1;
+}
+.cardStackContainer #card-2 {
+    top: 55px;
+    left: 60px;
+    z-index: 2;
+}
+.cardStackContainer #card-3 {
+    top: 65px;
+    left: 70px;
+    z-index: 3;
+}
+.cardStackContainer #card-4 {
+    top: 75px;
+    left: 80px;
+    z-index: 4;
 }
 
 /* Code listing styles */

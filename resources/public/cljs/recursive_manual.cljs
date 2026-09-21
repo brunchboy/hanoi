@@ -18,7 +18,6 @@
    (check-step card step true))
   ([card step done?]
    (let [item (.getElementById js/document (str "step-" card "-" step))]
-     (.log js/console "check-step" card step done? item)
      (set! (.-className item) (if done? "completed" "")))))
 
 (def step-functions

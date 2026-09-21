@@ -13,7 +13,8 @@
    ["recursion_works.html" "Recursive Algortihm: Can it Work?"]
    ["recursive_demo.html" "Recursive Algorithm Demonstration"]
    ["recursive_moves.html" "Recursive Move Count"]
-   ["recursive_manual.html" "Recursion by Hand"]])
+   ["recursive_manual.html" "Recursion by Hand"]
+   ["not_recursive.html" "Can We Avoid Recursion?"]])
 
 (defn identify-page
   "Locates the current page in the index so we can determine our page

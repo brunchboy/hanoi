@@ -31,6 +31,10 @@ dd {
     margin-bottom: 0.25em;
 }
 
+.slide .step-hidden {
+    opacity: 0;
+}
+
 .slide .controls td {
     padding-top: 1em;
     text-align: center;

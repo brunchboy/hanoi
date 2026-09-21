@@ -241,6 +241,7 @@
         moves (.getElementById js/document "moves")]
     (board/reset-board num)
     (reset! tasks '())
+    (format-tasks)
     (set-running-state "" nil)
     (set! (.-innerHTML moves) (hanoi-fast num 'A 'B))
     (board/draw-current-board-state)

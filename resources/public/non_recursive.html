@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Towers of Hanoi: A Non-Recursiive Algorithm</title>
+
+    <link rel="stylesheet" href="css/main.css"/>
+    <script src="js/scittle.js" type="application/javascript"></script>
+    <script>var SCITTLE_NREPL_WEBSOCKET_PORT = 1340;</script>
+    <script src="js/scittle.nrepl.js" type="application/javascript"></script>
+    <script src="cljs/nav.cljs" type="application/x-scittle"></script>
+    <script src="cljs/board.cljs" type="application/x-scittle"></script>
+    <script src="cljs/non_recursive.cljs" type="application/x-scittle"></script>
+  </head>
+
+  <body>
+    <div class="slide">
+      <table>
+        <thead>
+          <tr>
+            <th>State</th>
+            <th>Moves</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <canvas id="state" width="600" height="400"></canvas>
+            </td>
+            <td>
+              <div class="scrollableAreaContainer" onclick="toggleRings()">
+                <div class="scrollableMoveContainer">
+                  <ul id="moves" class="scrollableMoves">
+                  </ul>
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr class="controls">
+            <td colspan="2">
+              <label for="num-rings">Number of rings:</label>
+              <input id="num-rings" type="number" min="1" max="10" value="10" />
+              <button type="button" onclick="resetBoard()">Reset Board</button>
+              <button type="button" onclick="solve()">Solve</button>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <label for="fade-ms">Speed:</label>
+              🐇 <input type="range" id="fade-ms" min="50" max="1500" value="500" step="10"/> 🐢
+              &nbsp;
+              <label for="auto-step">Auto-step:</label>
+              <input type="checkbox" id="auto-step" switch />
+            </td>
+            </tr>
+        </tbody>
+      </table>
+
+      <ol>
+        <li>
+          Determine how we move the smallest ring: count rings in the tower; if the count is…
+          <ul>
+            <li>
+              <span id="odd-rings"><em>Odd</em>, we rotate it left: A, B, C, A, B, C…</span>
+            </li>
+            <li>
+              <span id="even-rings"><em>Even</em>, we rotate it left: A, C, B, A, C, B…</span>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <span id="step-2">Rotate the smallest ring.</span>
+        </li>
+        <li>
+          <span id="step-3">Check if we are done, is the tower moved to post B?</span>
+        </li>
+        <li>
+          <span id="step-4">If not, make the only legal move that does not involve the
+            smallest ring, then go back to step 2.</span>
+        </li>
+      </ol>
+    </div>
+
+    <div id="navigation"></div>
+
+  </body>
+</html>

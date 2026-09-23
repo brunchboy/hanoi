@@ -205,3 +205,6 @@ code .inside {
     color: green;
     background-color: lightgray;
 }
+.rotation-chosen {
+    background-color: lightgreen;
+}

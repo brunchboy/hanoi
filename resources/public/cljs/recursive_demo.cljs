@@ -96,12 +96,6 @@
     (let [elem (.getElementById js/document id)]
       (set! (.-className elem) ""))))
 
-(defn format-move
-  "Helper function to generate the HTML describing a ring move."
-  [from to ring]
-  (str "<li><span class=\"ring-moved\"><span style=\"color:" (get board/ring-colors ring)
-       "\">Ring " (inc ring) ": </span></span>" from " → " to "</li>"))
-
 (defn animate-top-move
   "Runs an animation that shows the top task, which is a move, taking
   place."
@@ -117,7 +111,7 @@
 
     ;; Move the ring as specified, and record it.
     (let [ring (board/animate-ring-move from to update-step-button)]
-      (.insertAdjacentHTML moves "beforeend" (format-move from to ring)))
+      (.insertAdjacentHTML moves "beforeend" (board/format-move from to ring)))
 
     ;; Fade out and drop the task that caused this move.
     (swap! tasks rest)
@@ -231,7 +225,7 @@
   (str
    (when (> num-rings 1) (hanoi-fast (dec num-rings) from (board/other-post from to)))
    (let [ring (board/move-ring (board/post-index from) (board/post-index to))]
-     (format-move from to ring))
+     (board/format-move from to ring))
    (when (> num-rings 1) (hanoi-fast (dec num-rings) (board/other-post from to) to))))
 
 (defn solve

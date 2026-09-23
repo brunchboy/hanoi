@@ -286,3 +286,9 @@
   [num-rings]
   (reset! board [(range num-rings) '() '()])
   (draw-current-board-state))
+
+(defn format-move
+  "Helper function to generate the HTML describing a ring move."
+  [from to ring]
+  (str "<li><span class=\"ring-moved\"><span style=\"color:" (get board/ring-colors ring)
+       "\">Ring " (inc ring) ": </span></span>" from " → " to "</li>"))

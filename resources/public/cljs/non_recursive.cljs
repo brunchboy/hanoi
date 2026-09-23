@@ -35,12 +35,6 @@
     (set! (.-disabled button) done)
     (when (and @auto-step (not done)) (run-top-task))))
 
-(defn format-move
-  "Helper function to generate the HTML describing a ring move."
-  [from to ring]
-  (str "<li><span class=\"ring-moved\"><span style=\"color:" (get board/ring-colors ring)
-       "\">Ring " (inc ring) ": </span></span>" from " → " to "</li>"))
-
 (defn show-direction
   "Indicate which direction the smallest ring rotates, given the number
   of rings in the tower."
@@ -131,7 +125,7 @@
   (str
    (when (> num-rings 1) (hanoi-fast (dec num-rings) from (board/other-post from to)))
    (let [ring (board/move-ring (board/post-index from) (board/post-index to))]
-     (format-move from to ring))
+     (board/format-move from to ring))
    (when (> num-rings 1) (hanoi-fast (dec num-rings) (board/other-post from to) to))))
 
 (defn solve

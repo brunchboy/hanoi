@@ -17,7 +17,7 @@
   direction the smallest ring needs to rotate."
   (atom 0))
 
-(declare run-top-task)
+(declare next-algorithm-step)
 
 (defn done?
   "Checks whether we have reached the goal state, where all rings are on
@@ -26,14 +26,11 @@
   (empty? (concat (first @board/board) (first (rest (rest @board/board))))))
 
 (defn update-step-button
-  "Makes sure the Step button is enabled if there are tasks in the
-  stack, and disabled otherwise. If auto-step is true, run the next
-  task."
+  "Re-enable the step button; if auto-step is true, run the next task."
   []
-  (let [button (.getElementById js/document "step-button")
-        done   (done?)]
-    (set! (.-disabled button) done)
-    (when (and @auto-step (not done)) (run-top-task))))
+  (let [button (.getElementById js/document "step-button")]
+    (set! (.-disabled button) false)
+    (when @auto-step (next-algorithm-step))))
 
 (defn show-direction
   "Indicate which direction the smallest ring rotates, given the number
@@ -69,7 +66,7 @@
     (.insertAdjacentHTML moves "beforeend"
                          (str "<li><span class=\"ring-moved\"><span style=\"color:" (get board/ring-colors ring)
                               "\">Ring " (inc ring) ": </span></span>" from " → " to "</li>"))
-    (board/animate-ring-move from to (update-step-button))))
+    (board/animate-ring-move from to update-step-button)))
 
 (defn rotate-smallest-ring
   "Animate rotating the smallest in the direction needed to solve the
@@ -83,7 +80,6 @@
   "Make (and animate) the only legal move that does not involve the
   smallest ring."
   []
-  (update-step-button)
   (let [other-rings (sort (filter pos? (filter identity (map first @board/board))))
         from-index  (post-index-of-ring (first other-rings))
         to-index    (if (= 1 (count other-rings)) (post-index-of-ring nil) (post-index-of-ring (second other-rings)))]
@@ -100,7 +96,7 @@
       2 (rotate-smallest-ring)
       3 (if (done?)
           (set! (.-className (.getElementById js/document "step-3")) "rotation-chosen")
-          (update-step-button))
+          (.setTimeout js/window update-step-button @fade-ms))
       4 (make-other-legal-move))))
 
 (set! (.-nextStep js/window) next-algorithm-step)

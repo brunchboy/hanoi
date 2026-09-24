@@ -294,10 +294,61 @@
        "\">Ring " (inc ring) ": </span></span>" from " → " to "</li>"))
 
 (defn hanoi-recursive-fast
-  "Performs a non-animated solution, returning the formatted move list."
+  "Performs a non-animated recursive solution, returning the formatted
+  move list."
   [num-rings from to]
   (str
    (when (> num-rings 1) (hanoi-recursive-fast (dec num-rings) from (board/other-post from to)))
    (let [ring (board/move-ring (board/post-index from) (board/post-index to))]
      (format-move from to ring))
    (when (> num-rings 1) (hanoi-recursive-fast (dec num-rings) (board/other-post from to) to))))
+
+(defn done?
+  "Checks whether we have reached the goal state, where all rings are on
+  post B."
+  []
+  (empty? (concat (first @board) (first (rest (rest @board))))))
+
+(def post-symbol
+  "Maps from post index to the symbol by which we refer to that post."
+  {0 'A
+   1 'B
+   2 'C})
+
+(defn post-index-of-ring
+  "Given the number of a ring we know is at the top of a post, returns
+  the index of the post it is on."
+  [n]
+  (let [top-rings (map first @board/board)]
+    (second (first (drop-while (fn [[top _]] (not= top n))
+                               (partition 2 (interleave top-rings (range))))))))
+
+(defn rotate-smallest-ring
+  "Rotate the smallest in the direction needed to solve the
+  puzzle, returning the move description."
+  [num-rings]
+  (let [from-index (post-index-of-ring 0)
+        to-index   (mod (+ from-index (if (odd? num-rings)  1 -1)) 3)
+        ring       (move-ring from-index to-index)]
+    (format-move (post-symbol from-index) (post-symbol to-index) ring)))
+
+(defn make-other-legal-move
+  "Make (and return the description of) the only legal move that does
+  not involve the smallest ring."
+  []
+  (let [other-rings (sort (filter pos? (filter identity (map first @board))))
+        from-index  (post-index-of-ring (first other-rings))
+        to-index    (if (= 1 (count other-rings)) (post-index-of-ring nil) (post-index-of-ring (second other-rings)))
+        ring        (move-ring from-index to-index)]
+    (format-move (post-symbol from-index) (post-symbol to-index) ring)))
+
+(defn hanoi-nonrecursive-fast
+  "Performs a non-animated iterative solution, returning the formatted
+  move list. Assumes the board starts in the initial state."
+  []
+  (let [num-rings (count (first @board))]
+    (loop [moves ""]
+      (let [moves (str moves (rotate-smallest-ring num-rings))]
+        (if (done?)
+          moves
+          (recur (str moves (make-other-legal-move))))))))

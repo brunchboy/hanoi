@@ -19,12 +19,6 @@
 
 (declare next-algorithm-step)
 
-(defn done?
-  "Checks whether we have reached the goal state, where all rings are on
-  post B."
-  []
-  (empty? (concat (first @board/board) (first (rest (rest @board/board))))))
-
 (defn update-step-button
   "Re-enable the step button; if auto-step is true, run the next task."
   []
@@ -41,38 +35,22 @@
     (set! (.-className odd-elem) (if (odd? @num-rings) "rotation-chosen" ""))
     (set! (.-className even-elem) (if (even? @num-rings) "rotation-chosen" ""))))
 
-(def post-symbol
-  "Maps from post index to the symbol by which we refer to that post."
-  {0 'A
-   1 'B
-   2 'C})
-
-(defn post-index-of-ring
-  "Given the number of a ring we know is at the top of a post, returns
-  the index of the post it is on."
-  [n]
-  (let [top-rings (map first @board/board)]
-    (second (first (drop-while (fn [[top _]] (not= top n))
-                               (partition 2 (interleave top-rings (range))))))))
-
 (defn animate-and-record-move
   "Given a pair of post indices, animate moving the top ring as
   indicated, and add it to the move list. Finish by updating the state
   of the step button."
   [from-index to-index ring]
   (let [moves (.getElementById js/document "moves")
-        from  (post-symbol from-index)
-        to    (post-symbol to-index)]
-    (.insertAdjacentHTML moves "beforeend"
-                         (str "<li><span class=\"ring-moved\"><span style=\"color:" (get board/ring-colors ring)
-                              "\">Ring " (inc ring) ": </span></span>" from " → " to "</li>"))
+        from  (board/post-symbol from-index)
+        to    (board/post-symbol to-index)]
+    (.insertAdjacentHTML moves "beforeend" (board/format-move from to ring))
     (board/animate-ring-move from to update-step-button)))
 
 (defn rotate-smallest-ring
   "Animate rotating the smallest in the direction needed to solve the
   puzzle."
   []
-  (let [from-index (post-index-of-ring 0)
+  (let [from-index (board/post-index-of-ring 0)
         to-index   (mod (+ from-index (if (odd? @num-rings)  1 -1)) 3)]
     (animate-and-record-move from-index to-index 0)))
 
@@ -81,8 +59,10 @@
   smallest ring."
   []
   (let [other-rings (sort (filter pos? (filter identity (map first @board/board))))
-        from-index  (post-index-of-ring (first other-rings))
-        to-index    (if (= 1 (count other-rings)) (post-index-of-ring nil) (post-index-of-ring (second other-rings)))]
+        from-index  (board/post-index-of-ring (first other-rings))
+        to-index    (if (= 1 (count other-rings))
+                      (board/post-index-of-ring nil)
+                      (board/post-index-of-ring (second other-rings)))]
     (animate-and-record-move from-index to-index (first other-rings))))
 
 (defn clear-step-indicators
@@ -100,7 +80,7 @@
       (set! (.-className (.getElementById js/document (str "step-" i))) (if (= i step) "stepHighlight" "")))
     (case step
       2 (rotate-smallest-ring)
-      3 (if (done?)
+      3 (if (board/done?)
           (set! (.-className (.getElementById js/document "step-3")) "rotation-chosen")
           (.setTimeout js/window update-step-button @fade-ms))
       4 (make-other-legal-move))))
@@ -128,7 +108,7 @@
   (let [num   (parse-long (.-value (.getElementById js/document "num-rings")))
         moves (.getElementById js/document "moves")]
     (board/reset-board num)
-    (set! (.-innerHTML moves) (board/hanoi-recursive-fast num 'A 'B))
+    (set! (.-innerHTML moves) (board/hanoi-nonrecursive-fast))
     (board/draw-current-board-state)
     (nav/set-step (* 3 (.pow js/Math 2 (dec num))))
     (update-step-button)))

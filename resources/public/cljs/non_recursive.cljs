@@ -85,6 +85,12 @@
         to-index    (if (= 1 (count other-rings)) (post-index-of-ring nil) (post-index-of-ring (second other-rings)))]
     (animate-and-record-move from-index to-index (first other-rings))))
 
+(defn clear-step-indicators
+  "Removes styling that indicates what step is currently executing."
+  []
+  (doseq [i (range 2 5)]
+      (set! (.-className (.getElementById js/document (str "step-" i))) "")))
+
 (defn next-algorithm-step
   []
   (set! (.-disabled (.getElementById js/document "step-button")) true)
@@ -109,6 +115,7 @@
     (board/reset-board num)
     (set! (.-innerHTML moves) "")
     (reset! num-rings num)
+    (clear-step-indicators)
     (show-direction))
   (nav/set-step 1)
   (update-step-button))

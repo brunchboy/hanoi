@@ -132,7 +132,7 @@
     (board/reset-board num)
     (set! (.-innerHTML moves) (hanoi-fast num 'A 'B))
     (board/draw-current-board-state)
-    (nav/set-step (* 3 (dec (.pow js/Math 2 num))))
+    (nav/set-step (* 3 (.pow js/Math 2 (dec num))))
     (update-step-button)))
 
 (set! (.-solve js/window) solve)

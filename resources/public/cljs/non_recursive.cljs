@@ -122,22 +122,13 @@
 
 (set! (.-resetBoard js/window) reset-board)
 
-(defn hanoi-fast
-  "Performs a non-animated solution, returning the formatted move list."
-  [num-rings from to]
-  (str
-   (when (> num-rings 1) (hanoi-fast (dec num-rings) from (board/other-post from to)))
-   (let [ring (board/move-ring (board/post-index from) (board/post-index to))]
-     (board/format-move from to ring))
-   (when (> num-rings 1) (hanoi-fast (dec num-rings) (board/other-post from to) to))))
-
 (defn solve
   "Helper function to quickly get to a solved state."
   []
   (let [num   (parse-long (.-value (.getElementById js/document "num-rings")))
         moves (.getElementById js/document "moves")]
     (board/reset-board num)
-    (set! (.-innerHTML moves) (hanoi-fast num 'A 'B))
+    (set! (.-innerHTML moves) (board/hanoi-recursive-fast num 'A 'B))
     (board/draw-current-board-state)
     (nav/set-step (* 3 (.pow js/Math 2 (dec num))))
     (update-step-button)))

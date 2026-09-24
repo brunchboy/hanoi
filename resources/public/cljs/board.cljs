@@ -292,3 +292,12 @@
   [from to ring]
   (str "<li><span class=\"ring-moved\"><span style=\"color:" (get board/ring-colors ring)
        "\">Ring " (inc ring) ": </span></span>" from " → " to "</li>"))
+
+(defn hanoi-recursive-fast
+  "Performs a non-animated solution, returning the formatted move list."
+  [num-rings from to]
+  (str
+   (when (> num-rings 1) (hanoi-recursive-fast (dec num-rings) from (board/other-post from to)))
+   (let [ring (board/move-ring (board/post-index from) (board/post-index to))]
+     (format-move from to ring))
+   (when (> num-rings 1) (hanoi-recursive-fast (dec num-rings) (board/other-post from to) to))))

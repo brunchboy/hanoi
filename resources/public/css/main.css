@@ -131,10 +131,10 @@ dd {
     background-color: white;
     top: 0px;
 }
-.scrollableMoves .match {
+.match {
     color: green;
 }
-.scrollableMoves .fail {
+.fail {
     color: red;
 }
 .pairedMoveContainer {

@@ -13,7 +13,9 @@
   []
   (let [num       (parse-long (.-value (.getElementById js/document "num-rings")))
         recursive (.getElementById js/document "recursiveMoves")
-        iterative (.getElementById js/document "iterativeMoves")]
+        iterative (.getElementById js/document "iterativeMoves")
+        summary   (.getElementById js/document "moveSummary")
+        all-match (atom true)]
     (board/reset-board num)
     (set! (.-innerHTML recursive) (board/hanoi-recursive-fast num 'A 'B))
     (board/reset-board num)
@@ -24,7 +26,18 @@
             i-html (.-innerHTML i-move)]
         (if (= (.-innerHTML r-move) i-html)
           (set! (.-innerHTML i-move) (str i-html "<span class=\"match\"> ✓</span>"))
-          (set! (.-innerHTML i-move) (str i-html "<span class=\"fail\"> ×</span>")))))))
+          (do (set! (.-innerHTML i-move) (str i-html "<span class=\"fail\"> ×</span>"))
+              (reset! all-match false)))))
+    (let [r-count (.-childElementCount recursive)
+          i-count (.-childElementCount iterative)]
+      (set! (.-innerHTML summary)
+            (if (= r-count i-count)
+              (str "<span class=\"match\">" r-count " moves, "
+                   (if @all-match
+                     "all match"
+                     "</span><span class=\"fail\">some differ")
+                   ".</span>")
+              (str "<span class=\"fail\"> Recursive used " r-count " moves, iterative used " i-count ".</span>"))))))
 
 (set! (.-solve js/window) solve)
 

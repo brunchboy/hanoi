@@ -125,9 +125,11 @@
    'C 2})
 
 (defn draw-current-board-state
-  "Renders the current state of the board atom into the canvas."
+  "Renders the current state of the board atom into the canvas, if we
+  have one (the comparison slide is interested only in move lists)."
   []
-  (draw (.getElementById js/document "state") @board))
+  (when-let [canvas (.getElementById js/document "state")]
+    (draw canvas @board)))
 
 (defn ramp
   "Calculates a shifted cosine ramp from the starting to ending value

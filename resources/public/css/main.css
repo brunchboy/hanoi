@@ -35,8 +35,7 @@ dd {
     opacity: 0;
 }
 
-.slide .controls td {
-    padding-top: 1em;
+.slide .controls {
     text-align: center;
     font-size: 18px;
     font-family: system-ui;
@@ -81,7 +80,7 @@ dd {
     margin-right: auto;
 }
 .scrollableAreaContainer {
-    width: 200px;
+    width: 220px;
     height: 400px;
 
     border: 2px solid #111;
@@ -121,6 +120,25 @@ dd {
 }
 .scrollableMoves li .ring-moved {
     display: none;
+}
+.scrollableTable {
+    height: 400px;
+    border: 2px solid #111;
+    overflow: auto;
+}
+.sticky th {
+    position: sticky;
+    background-color: white;
+    top: 0px;
+}
+.scrollableMoves .match {
+    color: green;
+}
+.scrollableMoves .fail {
+    color: red;
+}
+.pairedMoveContainer {
+    width: 210px;
 }
 .cardStackContainer {
     position: relative;

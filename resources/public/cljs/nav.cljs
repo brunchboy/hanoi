@@ -15,7 +15,8 @@
    ["recursive_moves.html" "Recursive Move Count"]
    ["recursive_manual.html" "Recursion by Hand"]
    ["not_recursive.html" "Can We Avoid Recursion?"]
-   ["non_recursive.html" "A Non-recursive Algorithm"]])
+   ["non_recursive.html" "A Non-recursive Algorithm"]
+   ["comparison.html" "Comparing the Algorithms"]])
 
 (defn identify-page
   "Locates the current page in the index so we can determine our page

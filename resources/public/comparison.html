@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Towers of Hanoi: Comparing the Algorithms</title>
+
+    <link rel="stylesheet" href="css/main.css"/>
+    <script src="js/scittle.js" type="application/javascript"></script>
+    <script>var SCITTLE_NREPL_WEBSOCKET_PORT = 1340;</script>
+    <script src="js/scittle.nrepl.js" type="application/javascript"></script>
+    <script src="cljs/nav.cljs" type="application/x-scittle"></script>
+    <script src="cljs/board.cljs" type="application/x-scittle"></script>
+    <script src="cljs/comparison.cljs" type="application/x-scittle"></script>
+  </head>
+
+  <body>
+    <div class="slide narrow">
+      <h1>Comparing the Algorithms</h1>
+      <div class="scrollableTable">
+        <table class="sticky">
+          <thead>
+            <tr>
+              <th>Recursive</th>
+              <th>Iterative</th>
+            </tr>
+          </thead>
+          <tbody onclick="toggleRings()">
+            <tr>
+              <td>
+                <div class="pairedMoveContainer">
+                  <ul id="recursiveMoves" class="scrollableMoves">
+                  </ul>
+                </div>
+              </td>
+              <td>
+                <div class="pairedMoveContainer">
+                  <ul id="iterativeMoves" class="scrollableMoves">
+                  </ul>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="controls">
+        <label for="num-rings">Number of rings:</label>
+        <input id="num-rings" type="number" min="1" max="10" value="10" />
+        <button type="button" onclick="solve()">Solve</button>
+      </p>
+
+      <ul>
+        <li>
+          Both algorithms take the same number of moves.
+        </li>
+        <li>
+          In fact, we can see above that they generate identical sequences of moves.
+        </li>
+      </ul>
+    </div>
+
+    <div id="navigation"></div>
+
+  </body>
+</html>

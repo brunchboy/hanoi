@@ -47,6 +47,7 @@ dd {
 
 /* Navigation-related styles */
 .navigation {
+    clear: both;
     text-align: center;
     font-family: system-ui;
 }
@@ -244,4 +245,7 @@ kbd {
 }
 .system {
     font-family: system-ui;
+}
+.qr {
+    margin: 8px;
 }

@@ -4,7 +4,8 @@
 
 (def index
   "Lists the pages that make up the presentation, along with their titles."
-  [["index.html" "Title"]
+  [["navigation.html" "Keyboard Navigation"]
+   ["index.html" "Title"]
    ["rules.html" "Rules"]
    ["background.html" "Background"]
    ["recursive_intro.html" "The Recursive Algortihm Introduced"]

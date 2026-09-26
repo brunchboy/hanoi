@@ -226,3 +226,22 @@ code .inside {
 .rotation-chosen {
     background-color: lightgreen;
 }
+kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 5px;
+    font-family: system-ui;
+    font-size: 20px;
+    font-weight: 500;
+    color: #334155;
+    background: linear-gradient(180deg,#fff,#f1f5f9);
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    box-shadow: 0 2px 0 #cbd5e1,inset 0 1px 0 #fff;
+}
+.system {
+    font-family: system-ui;
+}

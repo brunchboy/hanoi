@@ -26,6 +26,7 @@
   number."
   []
   (let [filename (last (str/split (.-href (.-location js/window)) "/"))
+        filename (if (str/ends-with? filename ".html") filename "index.html")
         indexed  (map-indexed (fn [idx [f]] [idx f]) index)]
     ((fnil inc 0) (first (first (drop-while (fn [[_ f]] (not= f filename)) indexed))))))
 

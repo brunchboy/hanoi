@@ -9,6 +9,7 @@
    ["rules.html" "Rules"]
    ["background.html" "Background"]
    ["recursive_intro.html" "The Recursive Algortihm Introduced"]
+   ["comic.html" "Recursive Humor"]
    ["base_case.html" "Recursive Algortihm: Base Case"]
    ["recursive_step.html" "Recursive Algortihm: Recursive Step"]
    ["recursion_works.html" "Recursive Algortihm: Can it Work?"]
